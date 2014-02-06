@@ -1,0 +1,5 @@
+SCC = This is a Source Code Control file
+
+[pipe_UnitTests.dsp]
+SCC_Aux_Path = "\\Systech\Develop\MSVC\vss"
+SCC_Project_Name = "$/Core/pipe/pipe_UnitTests", HPDFAAAA

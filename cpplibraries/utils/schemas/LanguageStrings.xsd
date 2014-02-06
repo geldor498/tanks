@@ -1,0 +1,220 @@
+<!-- edited with XML Spy v3.5 NT (http://www.xmlspy.com) by  () -->
+<xs:schema xmlns:xs="http://www.w3.org/2000/10/XMLSchema">
+	<xs:element name="root" type="root">
+		<xs:annotation>
+			<xs:documentation>Schema for resource language strings xml files.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="root">
+		<xs:annotation>
+			<xs:documentation>root item of language strings xml file</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="LanguageStrings" type="LanguageString"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="LanguageString">
+		<xs:annotation>
+			<xs:documentation>list all language strings</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="phrase" type="Phrase" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Phrase">
+		<xs:annotation>
+			<xs:documentation>list all phrase (for all supported languages)</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="string" type="LangString" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="LangString">
+		<xs:annotation>
+			<xs:documentation>one language string</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="language" type="LanguageEx"/>
+			<xs:element name="value" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="LanguageEx">
+		<xs:union memberTypes="LanguageName LanguageCode"/>
+	</xs:simpleType>
+	<xs:simpleType name="LanguageCode">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="0(x|X)[0-9,a-f,A-F]{4}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LanguageName">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Arabic (Saudi Arabia)"/>
+			<xs:enumeration value="Bulgarian"/>
+			<xs:enumeration value="Catalan"/>
+			<xs:enumeration value="Chinese (Taiwan)"/>
+			<xs:enumeration value="Czech"/>
+			<xs:enumeration value="Danish"/>
+			<xs:enumeration value="German (Germany)"/>
+			<xs:enumeration value="Greek"/>
+			<xs:enumeration value="English (United States)"/>
+			<xs:enumeration value="Spanish (Traditional Sort)"/>
+			<xs:enumeration value="Finnish"/>
+			<xs:enumeration value="French (France)"/>
+			<xs:enumeration value="Hebrew"/>
+			<xs:enumeration value="Hungarian"/>
+			<xs:enumeration value="Icelandic"/>
+			<xs:enumeration value="Italian (Italy)"/>
+			<xs:enumeration value="Japanese"/>
+			<xs:enumeration value="Korean"/>
+			<xs:enumeration value="Dutch (Netherlands)"/>
+			<xs:enumeration value="Norwegian (Bokmal)"/>
+			<xs:enumeration value="Polish"/>
+			<xs:enumeration value="Portuguese (Brazil)"/>
+			<xs:enumeration value="Romanian"/>
+			<xs:enumeration value="Russian"/>
+			<xs:enumeration value="Croatian"/>
+			<xs:enumeration value="Slovak"/>
+			<xs:enumeration value="Albanian"/>
+			<xs:enumeration value="Swedish"/>
+			<xs:enumeration value="Thai"/>
+			<xs:enumeration value="Turkish"/>
+			<xs:enumeration value="Urdu"/>
+			<xs:enumeration value="Indonesian"/>
+			<xs:enumeration value="Ukrainian"/>
+			<xs:enumeration value="Belarusian"/>
+			<xs:enumeration value="Slovenian"/>
+			<xs:enumeration value="Estonian"/>
+			<xs:enumeration value="Latvian"/>
+			<xs:enumeration value="Lithuanian"/>
+			<xs:enumeration value="Farsi"/>
+			<xs:enumeration value="Vietnamese"/>
+			<xs:enumeration value="Armenian"/>
+			<xs:enumeration value="Azeri (Latin)"/>
+			<xs:enumeration value="Basque"/>
+			<xs:enumeration value="FYRO Macedonian"/>
+			<xs:enumeration value="Afrikaans"/>
+			<xs:enumeration value="Georgian"/>
+			<xs:enumeration value="Faroese"/>
+			<xs:enumeration value="Hindi"/>
+			<xs:enumeration value="Malay (Malaysia)"/>
+			<xs:enumeration value="Kazakh"/>
+			<xs:enumeration value="Kyrgyz (Cyrillic)"/>
+			<xs:enumeration value="Swahili"/>
+			<xs:enumeration value="Uzbek (Latin)"/>
+			<xs:enumeration value="Tatar"/>
+			<xs:enumeration value="Punjabi"/>
+			<xs:enumeration value="Gujarati"/>
+			<xs:enumeration value="Tamil"/>
+			<xs:enumeration value="Telugu"/>
+			<xs:enumeration value="Kannada"/>
+			<xs:enumeration value="Marathi"/>
+			<xs:enumeration value="Sanskrit"/>
+			<xs:enumeration value="Mongolian (Cyrillic)"/>
+			<xs:enumeration value="Galician"/>
+			<xs:enumeration value="Konkani"/>
+			<xs:enumeration value="Syriac"/>
+			<xs:enumeration value="Divehi"/>
+			<xs:enumeration value="Arabic (Iraq)"/>
+			<xs:enumeration value="Chinese (PRC)"/>
+			<xs:enumeration value="German (Switzerland)"/>
+			<xs:enumeration value="English (United Kingdom)"/>
+			<xs:enumeration value="Spanish (Mexico)"/>
+			<xs:enumeration value="French (Belgium)"/>
+			<xs:enumeration value="Italian (Switzerland)"/>
+			<xs:enumeration value="Dutch (Belgium)"/>
+			<xs:enumeration value="Norwegian (Nynorsk)"/>
+			<xs:enumeration value="Portuguese (Portugal)"/>
+			<xs:enumeration value="Serbian (Latin)"/>
+			<xs:enumeration value="Swedish (Finland)"/>
+			<xs:enumeration value="Azeri (Cyrillic)"/>
+			<xs:enumeration value="Malay (Brunei Darussalam)"/>
+			<xs:enumeration value="Uzbek (Cyrillic)"/>
+			<xs:enumeration value="Arabic (Egypt)"/>
+			<xs:enumeration value="Chinese (Hong Kong S.A.R.)"/>
+			<xs:enumeration value="German (Austria)"/>
+			<xs:enumeration value="English (Australia)"/>
+			<xs:enumeration value="Spanish (International Sort)"/>
+			<xs:enumeration value="French (Canada)"/>
+			<xs:enumeration value="Serbian (Cyrillic)"/>
+			<xs:enumeration value="Arabic (Libya)"/>
+			<xs:enumeration value="Chinese (Singapore)"/>
+			<xs:enumeration value="German (Luxembourg)"/>
+			<xs:enumeration value="English (Canada)"/>
+			<xs:enumeration value="Spanish (Guatemala)"/>
+			<xs:enumeration value="French (Switzerland)"/>
+			<xs:enumeration value="Arabic (Algeria)"/>
+			<xs:enumeration value="Chinese (Macau S.A.R.)"/>
+			<xs:enumeration value="German (Liechtenstein)"/>
+			<xs:enumeration value="English (New Zealand)"/>
+			<xs:enumeration value="Spanish (Costa Rica)"/>
+			<xs:enumeration value="French (Luxembourg)"/>
+			<xs:enumeration value="Arabic (Morocco)"/>
+			<xs:enumeration value="English (Ireland)"/>
+			<xs:enumeration value="Spanish (Panama)"/>
+			<xs:enumeration value="French (Monaco)"/>
+			<xs:enumeration value="Arabic (Tunisia)"/>
+			<xs:enumeration value="English (South Africa)"/>
+			<xs:enumeration value="Spanish (Dominican Republic)"/>
+			<xs:enumeration value="Arabic (Oman)"/>
+			<xs:enumeration value="English (Jamaica)"/>
+			<xs:enumeration value="Spanish (Venezuela)"/>
+			<xs:enumeration value="Arabic (Yemen)"/>
+			<xs:enumeration value="English (Caribbean)"/>
+			<xs:enumeration value="Spanish (Colombia)"/>
+			<xs:enumeration value="Arabic (Syria)"/>
+			<xs:enumeration value="English (Belize)"/>
+			<xs:enumeration value="Spanish (Peru)"/>
+			<xs:enumeration value="Arabic (Jordan)"/>
+			<xs:enumeration value="English (Trinidad)"/>
+			<xs:enumeration value="Spanish (Argentina)"/>
+			<xs:enumeration value="Arabic (Lebanon)"/>
+			<xs:enumeration value="English (Zimbabwe)"/>
+			<xs:enumeration value="Spanish (Ecuador)"/>
+			<xs:enumeration value="Arabic (Kuwait)"/>
+			<xs:enumeration value="English (Philippines)"/>
+			<xs:enumeration value="Spanish (Chile)"/>
+			<xs:enumeration value="Arabic (U.A.E.)"/>
+			<xs:enumeration value="Spanish (Uruguay)"/>
+			<xs:enumeration value="Arabic (Bahrain)"/>
+			<xs:enumeration value="Spanish (Paraguay)"/>
+			<xs:enumeration value="Arabic (Qatar)"/>
+			<xs:enumeration value="Spanish (Bolivia)"/>
+			<xs:enumeration value="Spanish (El Salvador)"/>
+			<xs:enumeration value="Spanish (Honduras)"/>
+			<xs:enumeration value="Spanish (Nicaragua)"/>
+			<xs:enumeration value="Spanish (Puerto Rico)"/>
+			<xs:enumeration value="Welsh"/>
+			<xs:enumeration value="Maori"/>
+			<xs:enumeration value="Maltese"/>
+			<xs:enumeration value="Quechua (Bolivia)"/>
+			<xs:enumeration value="Quechua (Ecuador)"/>
+			<xs:enumeration value="Quechua (Peru)"/>
+			<xs:enumeration value="Setswana (South Africa)"/>
+			<xs:enumeration value="Xhosa"/>
+			<xs:enumeration value="Zulu"/>
+			<xs:enumeration value="Sesotho sa Leboa (South Africa)"/>
+			<xs:enumeration value="Sami, Northern (Norway)"/>
+			<xs:enumeration value="Sami, Northern (Sweden)"/>
+			<xs:enumeration value="Sami, Northern (Finland)"/>
+			<xs:enumeration value="Sami, Lule (Norway)"/>
+			<xs:enumeration value="Sami, Lule (Sweden)"/>
+			<xs:enumeration value="Sami, Southern (Norway)"/>
+			<xs:enumeration value="Sami, Southern (Sweden)"/>
+			<xs:enumeration value="Sami, Skolt (Finland)"/>
+			<xs:enumeration value="Sami, Inari (Finland)"/>
+			<xs:enumeration value="Filipino (Philippines)"/>
+			<xs:enumeration value="Inuktitut (Latin, Canada)"/>
+			<xs:enumeration value="Irish (Ireland)"/>
+			<xs:enumeration value="Luxembourgish (Luxembourg)"/>
+			<xs:enumeration value="Mapudungun (Chile)"/>
+			<xs:enumeration value="Mohawk (Mohawk)"/>
+			<xs:enumeration value="Romansh (Switzerland)"/>
+			<xs:enumeration value="Frisian (Netherlands)"/>
+			<xs:enumeration value="Croatian (Bosnia and Herzegovina)"/>
+			<xs:enumeration value="Bosnian (Latin, Bosnia and Herzegovina)"/>
+			<xs:enumeration value="Serbian (Latin, Bosnia and Herzegovina)"/>
+			<xs:enumeration value="Serbian (Cyrillic, Bosnia and Herzegovina)"/>
+			<xs:enumeration value="Bosnian (Cyrillic, Bosnia and Herzegovina)"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

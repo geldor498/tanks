@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<root>
+	<XMLValuesTest>
+		<Str>&lt;aaa&gt;&lt;bb&gt;&lt;/aa&gt;&lt;/bb&gt;&lt;/aaa&gt;&lt;aa&gt;</Str>
+		<Str2>&lt;!-- some comment</Str2>
+		<SimpleData>ras-ras</SimpleData>
+		<SimpleData>dva-dva&lt;!-- some comment</SimpleData>
+		<SimpleData>mikrofon test</SimpleData>
+		<List>
+			<Str>1-one</Str>
+			<Str2>1-odin</Str2>
+		</List>
+		<List>
+			<Str>2-two</Str>
+			<Str2>2-dva</Str2>
+		</List>
+		<List>
+			<Str>3-three</Str>
+			<Str2>3-tri</Str2>
+		</List>
+		<Str3>&lt;[CDATA[some data &amp;&amp; &lt;a&gt;\"comes here</Str3>
+	</XMLValuesTest>
+</root>

@@ -1,0 +1,106 @@
+Microsoft Developer Studio Workspace File, Format Version 5.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "BaseGridOnTempl"=..\..\Credits\BaseGridOnTempl\BaseGridOnTempl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/Credits/BaseGridOnTempl", CEGEAAAA
+    ..\..\credits\basegridontempl
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "UnitTests"=.\UnitTests\UnitTests.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/Core/utils/UnitTests", PODFAAAA
+    .\unittests
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "pipe"=..\pipe\pipe.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/Core/pipe", YODFAAAA
+    ..\pipe
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name pipe_UnitTests
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name utils
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "pipe_UnitTests"=..\pipe\pipe_UnitTests\pipe_UnitTests.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/Core/pipe/pipe_UnitTests", HPDFAAAA
+    ..\pipe\pipe_unittests
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "utils"=.\utils.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/Core/utils", NXFEAAAA
+    .
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name UnitTests
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

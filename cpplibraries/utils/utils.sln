@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{059D6162-CD51-11D0-AE1F-00A0C90FFFC3}") = "BaseGridOnTempl", "..\..\Credits\BaseGridOnTempl\BaseGridOnTempl.dsp", "{624EF0C1-36A4-47E2-857D-69901B7A3831}"
+EndProject
+Project("{059D6162-CD51-11D0-AE1F-00A0C90FFFC3}") = "UnitTests", "UnitTests\UnitTests.dsp", "{3BED2AAD-2C7D-4B47-BA65-8238FDE4F496}"
+EndProject
+Project("{059D6162-CD51-11D0-AE1F-00A0C90FFFC3}") = "pipe", "..\pipe\pipe.dsp", "{4B544600-61EB-402E-95B6-4F43A0F4883A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CF146BA4-22DD-4FC1-A58B-7C4A049C7AF0} = {CF146BA4-22DD-4FC1-A58B-7C4A049C7AF0}
+		{4836CF67-9CDF-4CF1-87F5-9927AD77375D} = {4836CF67-9CDF-4CF1-87F5-9927AD77375D}
+	EndProjectSection
+EndProject
+Project("{059D6162-CD51-11D0-AE1F-00A0C90FFFC3}") = "pipe_UnitTests", "..\pipe\pipe_UnitTests\pipe_UnitTests.dsp", "{4836CF67-9CDF-4CF1-87F5-9927AD77375D}"
+EndProject
+Project("{059D6162-CD51-11D0-AE1F-00A0C90FFFC3}") = "utils", "utils.dsp", "{CF146BA4-22DD-4FC1-A58B-7C4A049C7AF0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3BED2AAD-2C7D-4B47-BA65-8238FDE4F496} = {3BED2AAD-2C7D-4B47-BA65-8238FDE4F496}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,58 @@
+Changes list.
+
+1. template<> struct EnumTraits
+   was renamed to EnumDescriptionBase 
+
+   Now to create enum description type you should derive it from EnumDescriptionBase<>
+   and not from EnumTraits<>.
+
+   file: serialize.h
+
+2. class CRegistryKey now use exception as error handling mechanism not a 
+   return codes. Functions that before return boolean value has no return (void)
+   and throw utils::CWin32Exception() exception class. 
+
+   For some error returned error code is note the best one 
+   CRegistryKey::get_last() may throw ERROR_BAD_FORMAT if ther is no 
+   conversation between registry type and user type. Error text message for this
+   error code is not appropriate to error sence. 
+
+   file:registry.h
+
+3. get_enumtarits() was renamed to get_enumdescription()
+
+   file: serialize.h
+
+
+--- 10.05.06 -------------------------------------------------------------------
+
+4.  functions common::convert() was moved to file "convert.h" from "utils.h"
+
+--- 10.05.07 -------------------------------------------------------------------
+
+5. changed usage of function find_attr()  (file: utils\attributes.h) 
+   you should specify just a attribute class, nut a structure class 
+   as it was before 
+
+   right:
+
+      find_attr<CMainFilter::UniqueNames>(_dnddata.m_sName)
+
+   wrong: 
+
+      find_attr<CMainFilter, CMainFilter::UniqueNames>(_dnddata.m_sName)
+
+6. Please specify macroses from utils\config.h in you project.
+   All information about config macroses are placed in the file utils\config.h.
+
+
+--- 10.05.11 -------------------------------------------------------------------
+
+7. Добавлена подержка error tags 
+   (errors.h)
+
+8. добавлены класс пребразования строк UNICODE <-> ASCII
+   (strconv.h)
+
+
+
