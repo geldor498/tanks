@@ -1186,6 +1186,13 @@ namespace common
 
 #endif//#if defined(USE_MFC)
 
+template<typename _Type> inline
+CString to_str(const _Type& _data)
+{
+	CString str;
+	convert(_data,str);
+	return str;
+}
 
 };//namespace common
 

@@ -36,7 +36,7 @@ struct ProcessCommand<_TOwner,_TObject,NullType>
 
 
 
-typedef TYPELIST_7(CShotCmd,CMoveCmd,CTakeArtefactCmd,CUseArtefactCmd,CPutArtefactCmd,CGetRadarInfoCmd,CGetTankInfoCmd) TankServerMessages;
+typedef TYPELIST_8(CShotCmd,CMoveCmd,CTakeArtefactCmd,CUseArtefactCmd,CPutArtefactCmd,CGetRadarInfoCmd,CGetTankInfoCmd,CGetExploitsInfoCmd) TankServerMessages;
 
 // Model classes of MVC architecture
 class CTank
@@ -51,6 +51,7 @@ protected:
 	CFlagColor m_flag[3];
 	double m_LTrackPos;
 	double m_RTrackPos;
+	long m_nTankID;
 
 protected:
 	CCriticalSection m_critsect;
@@ -62,6 +63,7 @@ public:
 		,const CString& _sTeamName
 		,const CString& _sTankName
 		,const CFlagColor (&_flag)[3]
+		,long _nTankID
 		)	
 		:CServerPipeCommImpl(_sServerPipeName)
 		,m_LTrackPos(0)
@@ -69,12 +71,16 @@ public:
 		,m_sTeamName(_sTeamName)
 		,m_sTankName(_sTankName)
 	{
+		m_nTankID = _nTankID;
 		start();
+		Sleep(100);
 		m_client.open(_sClientComputerName,_sClientPipeName);
 		size_t i=0;
 		for(i=0;i<_countof(m_flag);i++)
 			m_flag[i] = _flag[i];
 	}
+
+	long get_TankID() const {return m_nTankID;}
 
 	template<typename _Message>
 	bool process(_Message* _pmsg)
@@ -168,6 +174,11 @@ public:
 	void send_artefactinfo(const CArtefactInfo& _ai)
 	{
 		m_client.save(&_ai);
+	}
+
+	void send_exploits_info(const CExploitsInfo& _eis)
+	{
+		m_client.save(&_eis);
 	}
 
 	const CFlagColor* get_flag() const {return m_flag;}

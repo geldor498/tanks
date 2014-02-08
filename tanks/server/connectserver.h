@@ -40,7 +40,6 @@ struct CConnectionServer
 				,_pHelloWorldMsg->m_sTeamName,_pHelloWorldMsg->m_sTankName
 				,_pHelloWorldMsg->m_flag	
 				);
-			Sleep(10);
 			client.save(&answer);
 		}
 		return true;

@@ -125,14 +125,16 @@ struct CShotCmd
 	DECLARE_DATAGUID(g_CShotCmdGUID);
 	GET_MESSAGEGUID(CShotCmd);
 
-	double m_fTurretAngle;
-	double m_fGunAngle;
-	bool m_bShot;
+	long m_id;					// returned by exploit info message 
+	double m_fTurretAngle;		// turret rotate angle
+	double m_fGunAngle;			// gun angle
+	bool m_bShot;				// true if this is a shot
 
 	CShotCmd()
 		:m_fTurretAngle(0)
 		,m_fGunAngle(0)
 		,m_bShot(false)
+		,m_id(0)
 	{
 	}
 
@@ -140,6 +142,7 @@ struct CShotCmd
 	{
 		DefaultLayout()
 		{
+			add_simple(_T("id"),&CShotCmd::m_id);
 			add_simple(_T("TurretAngle"),&CShotCmd::m_fTurretAngle);
 			add_simple(_T("GunAngle"),&CShotCmd::m_fGunAngle);
 			add_simple(_T("IsShoot"),&CShotCmd::m_bShot);
@@ -159,8 +162,8 @@ struct CMoveCmd
 	DECLARE_DATAGUID(g_CMoveCmdGUID);
 	GET_MESSAGEGUID(CMoveCmd);
 
-	double m_fVLeftTrack;
-	double m_fVRightTrack;
+	double m_fVLeftTrack;	// left track speed
+	double m_fVRightTrack;	// right track speed
 
 	CMoveCmd()
 		:m_fVLeftTrack(0)
@@ -190,6 +193,10 @@ struct CTakeArtefactCmd
 	DECLARE_DATAGUID(g_CTakeArtefactCmdGUID);
 	GET_MESSAGEGUID(CTakeArtefactCmd);
 
+	CTakeArtefactCmd()
+	{
+	}
+
 	struct DefaultLayout : public Layout<CTakeArtefactCmd>
 	{
 		DefaultLayout()
@@ -201,7 +208,7 @@ struct CTakeArtefactCmd
 enum ArtefactTypeEn
 {
 	Artefact_Null = 0
-	,Artefact_Shell
+	//,Artefact_Shell
 	,Artefact_Fuel
 	,Artefact_Armor
 };
@@ -211,7 +218,7 @@ struct CArtefactTypeEnDescription : public EnumDescriptionBase<ArtefactTypeEn>
 	CArtefactTypeEnDescription()
 	{
 		enumerator(Artefact_Null,_T("NullArtefact"));
-		enumerator(Artefact_Shell,_T("ShellArtefact"));
+		//enumerator(Artefact_Shell,_T("ShellArtefact"));
 		enumerator(Artefact_Fuel,_T("FuelArtefact"));
 		enumerator(Artefact_Armor,_T("ArmorArtefact"));
 	}
@@ -230,9 +237,9 @@ struct CArtefactInfo
 	DECLARE_DATAGUID(g_CArtefactInfoGUID);
 	GET_MESSAGEGUID(CArtefactInfo);
 
-	ArtefactTypeEn m_type;
-	double m_fMass;
-	long m_ID;
+	ArtefactTypeEn m_type;	// artefact type
+	double m_fMass;			// mass of artefact
+	long m_ID;				// artefact id. used in operations with artefacts
 
 	CArtefactInfo()
 		:m_type(Artefact_Null)
@@ -263,7 +270,7 @@ struct CUseArtefactCmd
 	DECLARE_DATAGUID(g_CUseArtefactCmdGUID);
 	GET_MESSAGEGUID(CUseArtefactCmd);
 
-	long m_ArtefactID;
+	long m_ArtefactID;	// artefact id to use it 
 
 	CUseArtefactCmd()
 		:m_ArtefactID(0)
@@ -290,7 +297,7 @@ struct CPutArtefactCmd
 	DECLARE_DATAGUID(g_CPutArtefactCmdGUID);
 	GET_MESSAGEGUID(CPutArtefactCmd);
 
-	long m_ArtefactID;
+	long m_ArtefactID;	// artefact id to put it down
 
 	CPutArtefactCmd()
 		:m_ArtefactID(0)
@@ -327,17 +334,37 @@ struct CGetRadarInfoCmd
 
 enum ObjectEn
 {
-	Obj_Null = 0
-	,Obj_Ground
-	,Obj_Water
-	,Obj_Tree
-	,Obj_Rock
+	Obj_Null = 0		// returned for placed out of game plane
+	,Obj_Ground			// ground
+	,Obj_Water			// water
+	,Obj_Tree			// trees
+	,Obj_Rock			// rocks (and havy metal)))
 };
 
 static const TCHAR g_groundsym = 1;
 static const TCHAR g_watersym = 2;
 static const TCHAR g_treesym = 3;
 static const TCHAR g_rocksym = 4;
+
+struct CTankPosition
+{
+	CFPoint2D m_pos;		// tank position
+	long m_id;				// identity of tank on radar 
+
+	CTankPosition(const CFPoint2D& _pos = CFPoint2D(),long _id = -1)
+		:m_pos(_pos),m_id(_id)
+	{
+	}
+
+	struct DefaultLayout : public Layout<CTankPosition>
+	{
+		DefaultLayout()
+		{
+			add_struct(_T("pt"),&CTankPosition::m_pos,get_structlayout<CFPoint2D>());
+			add_simple(_T("id"),&CTankPosition::m_id);
+		}
+	};
+};
 
 // {26CE5BD0-7097-414b-9499-1DA922D4DEAB}
 static const GUID g_CRadarInfoGUID = 
@@ -350,11 +377,12 @@ struct CRadarInfo
 	DECLARE_DATAGUID(g_CRadarInfoGUID);
 	GET_MESSAGEGUID(CRadarInfo);
 
-	CString m_map;
-	long m_sz;
-	CFPoint2D m_pos;
-	std::list<CFPoint2D> m_tanks;
-	std::list<CFPoint2D> m_artefacts;
+	CString m_map;			// for map data
+	long m_sz;				// for map data
+	CFPoint2D m_pos;		// tank position 
+	CFPoint2D m_mappos;		// tank position on map
+	std::list<CTankPosition> m_tanks;	// tanks on a radar
+	std::list<CFPoint2D> m_artefacts;	// artefacts on a radar
 
 	CRadarInfo()
 		:m_sz(0)
@@ -428,9 +456,10 @@ struct CRadarInfo
 		{
 			add_simple(_T("map"),&CRadarInfo::m_map);
 			add_simple(_T("size"),&CRadarInfo::m_sz);
-			add_list(_T("tanks"),&CRadarInfo::m_tanks,get_structlayout<CFPoint2D>());
-			add_list(_T("artefacts"),&CRadarInfo::m_artefacts,get_structlayout<CFPoint2D>());
+			add_list(_T("tank"),&CRadarInfo::m_tanks,get_structlayout<CTankPosition>());
+			add_list(_T("artefact"),&CRadarInfo::m_artefacts,get_structlayout<CFPoint2D>());
 			add_struct(_T("position"),&CRadarInfo::m_pos,get_structlayout<CFPoint2D>());
+			add_struct(_T("map_position"),&CRadarInfo::m_mappos,get_structlayout<CFPoint2D>());
 		}
 	};
 };//struct CRadarInfo
@@ -466,16 +495,21 @@ struct CTankInfo
 	GET_MESSAGEGUID(CTankInfo)
 
 	CFPoint2D m_pos;
-	CFPoint2D m_v;
-	double m_fMass;
-	std::list<CArtefactInfo> m_artefacts;
+	double m_fDirection;
 	double m_fVLeftTrack;
 	double m_fVRightTrack;
+	double m_fMass;
+	double m_fArmor;
+	double m_fFuel;
+	std::list<CArtefactInfo> m_artefacts;
 
 	CTankInfo()
 		:m_fMass(0)
 		,m_fVLeftTrack(0)
 		,m_fVRightTrack(0)
+		,m_fArmor(0)
+		,m_fFuel(0)
+		,m_fDirection(0)
 	{
 	}
 
@@ -484,14 +518,87 @@ struct CTankInfo
 		DefaultLayout()
 		{
 			add_struct(_T("position"),&CTankInfo::m_pos,get_structlayout<CFPoint2D>());
-			add_struct(_T("v"),&CTankInfo::m_v,get_structlayout<CFPoint2D>());
+			add_simple(_T("direction"),&CTankInfo::m_fDirection);
 			add_simple(_T("mass"),&CTankInfo::m_fMass);
-			add_list(_T("Artefact"),&CTankInfo::m_artefacts,get_structlayout<CArtefactInfo>());
 			add_simple(_T("VLeftTrack"),&CTankInfo::m_fVLeftTrack);
 			add_simple(_T("VRightTrack"),&CTankInfo::m_fVRightTrack);
+			add_simple(_T("Armor"),&CTankInfo::m_fArmor);
+			add_simple(_T("Fuel"),&CTankInfo::m_fFuel);
+			add_list(_T("Artefact"),&CTankInfo::m_artefacts,get_structlayout<CArtefactInfo>());
 		}
 	};
 };//struct CTankInfo
+
+// {3D96119D-8D2B-4c9d-8DC7-6C906BECC895}
+static const GUID g_CGetExploitsInfoCmdGUID = 
+{ 0x3d96119d, 0x8d2b, 0x4c9d, { 0x8d, 0xc7, 0x6c, 0x90, 0x6b, 0xec, 0xc8, 0x95 } };
+
+struct CGetExploitsInfoCmd
+	:public CMessage
+	,public CPipeSerializedDataBaseImpl<CGetExploitsInfoCmd>	
+{
+	DECLARE_DATAGUID(g_CGetExploitsInfoCmdGUID);
+	GET_MESSAGEGUID(CGetExploitsInfoCmd);
+
+	CGetExploitsInfoCmd()
+	{
+	}
+
+	struct DefaultLayout : public Layout<CGetExploitsInfoCmd>
+	{
+		DefaultLayout()
+		{
+		}
+	};
+};
+
+struct CExploitInfo
+{
+	long m_id;			// shell id. that was send by CShootCmd
+	CFPoint3D m_pt;		// end point of shell. exploit coordinates
+	double m_fFlyTime;	// fly time in seconds
+	double m_fHitPoints;	// armor loss of tank when there was a hit
+
+	CExploitInfo()
+		:m_id(0)
+		,m_fFlyTime(0)
+		,m_fHitPoints(0)
+	{
+	}
+
+	struct DefaultLayout : public Layout<CExploitInfo>
+	{
+		DefaultLayout()
+		{
+			add_simple(_T("id"),&CExploitInfo::m_id);
+			add_struct(_T("pt"),&CExploitInfo::m_pt,get_structlayout<CFPoint3D>());
+			add_simple(_T("FlyTime"),&CExploitInfo::m_fFlyTime);
+			add_simple(_T("HitPoints"),&CExploitInfo::m_fHitPoints);
+		}
+	};
+};
+
+// {405E90DF-401E-491a-960F-A65A39DB21AF}
+static const GUID g_CExploitsInfoGUID = 
+{ 0x405e90df, 0x401e, 0x491a, { 0x96, 0xf, 0xa6, 0x5a, 0x39, 0xdb, 0x21, 0xaf } };
+
+struct CExploitsInfo
+	:public CMessage
+	,public CPipeSerializedDataBaseImpl<CExploitsInfo>
+{
+	DECLARE_DATAGUID(g_CExploitsInfoGUID);
+	GET_MESSAGEGUID(CExploitsInfo);
+
+	std::list<CExploitInfo> m_exploits;	// exploits of you shells
+
+	struct DefaultLayout : public Layout<CExploitsInfo>
+	{
+		DefaultLayout()
+		{
+			add_list(_T("exploits"),&CExploitsInfo::m_exploits,get_structlayout<CExploitInfo>());
+		}
+	};
+};
 
 struct CFlagColor : public CColor
 {
@@ -521,11 +628,11 @@ struct CHelloWorld
 	DECLARE_DATAGUID(g_CHelloWorldGUID);
 	GET_MESSAGEGUID(CHelloWorld);
 
-	CString m_sTankName;
-	CString m_sTeamName;
-	CString m_sTankClientComputer;
-	CString m_sPipeName;
-	CFlagColor m_flag[3];
+	CString m_sTankName;	// tank name
+	CString m_sTeamName;	// tank team name
+	CString m_sTankClientComputer;	// computer name. used to connect server to client
+	CString m_sPipeName;	// used to connect server to client
+	CFlagColor m_flag[3];	// flag colors
 
 	struct DefaultLayout : public Layout<CHelloWorld>
 	{
@@ -551,7 +658,8 @@ struct CHandShack
 	DECLARE_DATAGUID(g_CHandShackGUID);
 	GET_MESSAGEGUID(CHandShack);
 
-	CString m_sTankPipeID;
+	CString m_sTankPipeID;	// server pipe name. used to connect client to server
+
 	struct DefaultLayout : public Layout<CHandShack>
 	{
 		DefaultLayout()
@@ -598,16 +706,17 @@ struct CClientTank
 			hw.m_flag[i] = _flag[i];
 		serv.save(&hw);
 		CHandShack hs;
-		if(!wait_message(hs)) return false;
+		if(!wait_message(hs,true,get_stophandle())) return false;
 		return m_server.open(_sServerCompName,hs.m_sTankPipeID);
 	}
 
-	void shot(double _fTurretAngle,double _fGunAngle, bool _bShot)
+	void shot(double _fTurretAngle,double _fGunAngle, bool _bShot,long _nID)
 	{
 		CShotCmd shot;
 		shot.m_fTurretAngle = _fTurretAngle;
 		shot.m_fGunAngle = _fGunAngle;
 		shot.m_bShot = _bShot;
+		shot.m_id = _nID;
 		m_server.save(&shot);
 	}
 
@@ -623,7 +732,7 @@ struct CClientTank
 	{
 		CTakeArtefactCmd cmd;
 		m_server.save(&cmd);
-		wait_message(_artefact);
+		wait_message(_artefact,true,get_stophandle());
 	}
 
 	void use_artefact(long _nArtefactID)
@@ -644,14 +753,21 @@ struct CClientTank
 	{
 		CGetRadarInfoCmd cmd;
 		m_server.save(&cmd);
-		wait_message(_info);
+		wait_message(_info,true,get_stophandle());
 	}
 
 	void get_tankinfo(CTankInfo& _tankinfo)
 	{
 		CGetTankInfoCmd cmd;
 		m_server.save(&cmd);
-		wait_message(_tankinfo);
+		wait_message(_tankinfo,true,get_stophandle());
+	}
+
+	void get_exploitsinfo(CExploitsInfo& _exploitsinfo)
+	{
+		CGetExploitsInfoCmd cmd;
+		m_server.save(&cmd);
+		wait_message(_exploitsinfo,true,get_stophandle());
 	}
 
 	template<typename _Message>

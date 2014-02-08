@@ -3,6 +3,7 @@
 #include "phisics.h"
 #include "GameConsts.h"
 #include "../utility/graphics.h"
+#include "messages.h"
 
 inline
 CFPoint3D todraw(const CFPoint3D& _pt)
@@ -406,7 +407,13 @@ void CControl::process_commands(double _dt)
 		{
 			if((**sit).m_interaction || (**sit).fallback())
 			{
-				m_world.add_exploit((**sit).m_interaction?10:4,(**sit).m_mass_center,**sit);
+				m_world.add_exploit(
+					(**sit).m_interaction?10:4
+					,(**sit).m_mass_center
+					,**sit,(*sit)->get_id(),(*sit)->get_fly_time()
+					,(*sit)->get_tank_id()
+					,(*sit)->m_fHit
+					);
 				(**sit).m_interaction = true;
 			}
 		}
@@ -432,7 +439,7 @@ void CControl::process_command(const  CShotCmd& _shot,CTank& _tank)
 {
 	_tank.set_gun(_shot.m_fTurretAngle,_shot.m_fGunAngle, _shot.m_bShot);
 	if(_shot.m_bShot)
-		m_world.add_Shell(_tank);	
+		m_world.add_Shell(_tank,_shot.m_id,_tank.get_TankID());	
 }
 
 void CControl::process_command(const CTakeArtefactCmd& _cmd,CTank& _tank)
@@ -450,17 +457,19 @@ void CControl::process_command(const CTakeArtefactCmd& _cmd,CTank& _tank)
 	{
 		if(CPHelper::norm2_2d(_tank.m_mass_center - it->second->m_mass_center)<pow(_tank.m_sphereRadious, 2) )
 		{
-			if(!it->second->m_occupied){
+			if(!it->second->m_occupied)
+			{
 				_tank.take_artefact(it->second);
 				it->second->m_occupied = true;
 				ai.m_fMass = it->second->m_mass;
 				ai.m_type = it->second->m_type;
 				ai.m_ID = it->second->m_ID;
 				_tank.send_artefactinfo(ai);
-				break;
+				return;
 			}
 		}
 	}
+	// send artefact info if there is no artefact
 	_tank.send_artefactinfo(ai);
 }
 
@@ -468,6 +477,7 @@ void CControl::process_command(const CUseArtefactCmd& _cmd,CTank& _tank)
 {
 	if(_tank.find_artefact(_cmd.m_ArtefactID))
 	{
+		VERIFY_EXIT(m_world.m_artefacts.find(_cmd.m_ArtefactID)!=m_world.m_artefacts.end());
 		_tank.use_artefact(m_world.m_artefacts[_cmd.m_ArtefactID]);
 		delete m_world.m_artefacts[_cmd.m_ArtefactID];
 		m_world.m_artefacts.erase(_cmd.m_ArtefactID);
@@ -479,8 +489,9 @@ void CControl::process_command(const CPutArtefactCmd& _cmd,CTank& _tank)
 	if(_tank.find_artefact(_cmd.m_ArtefactID))
 	{
 		CGameWorld::Artefacts::iterator it = m_world.m_artefacts.find(_cmd.m_ArtefactID);
-		if(it != m_world.m_artefacts.end()){
-			_tank.put_artefact( it->second);
+		if(it != m_world.m_artefacts.end())
+		{
+			_tank.put_artefact(it->second);
 			it->second->m_occupied = false;
 		}
 	}
@@ -488,13 +499,13 @@ void CControl::process_command(const CPutArtefactCmd& _cmd,CTank& _tank)
 
 void CControl::process_command(const CGetRadarInfoCmd& _cmd,CTank& _tank)	
 {
-	// TODO: tank
 	CFPoint2D pos = _tank.get_pos();
 	long posx = (long)floor(CPHelper::tr_x(pos.x));
 	long posy = (long)floor(CPHelper::tr_y(pos.y));
 	size_t radarR = (long)singleton<CGameConsts>::get().radarR();
 	CRadarInfo ri;
 	ri.m_pos = pos;
+	ri.m_mappos = CFPoint2D(posx,posy);
 	ri.resize(radarR*2);
 	long x=0,y=0;
 	for(y=0;(size_t)y<radarR*2;y++)
@@ -527,7 +538,7 @@ void CControl::process_command(const CGetRadarInfoCmd& _cmd,CTank& _tank)
 			CFPoint2D pos = tank.get_pos();
 			if(rc.inside(pos))
 			{
-				ri.m_tanks.push_back(pos);
+				ri.m_tanks.push_back(CTankPosition(pos,tank.get_TankID()));
 			}
 		}
 		CGameWorld::Artefacts::const_iterator
@@ -549,17 +560,26 @@ void CControl::process_command(const CGetRadarInfoCmd& _cmd,CTank& _tank)
 
 void CControl::process_command(const CGetTankInfoCmd& _cmd,CTank& _tank)
 {
-	// TODO: tank
 	CTankInfo ti;
-	//_tank.get_artefacts(ti.m_artefacts);
 	double lt=0,rt=0,ta=0,ga=0;
 	_tank.get_state(lt,rt,ta,ga);
 	ti.m_fVLeftTrack = lt;
 	ti.m_fVRightTrack = rt;
 	ti.m_pos = _tank.get_pos();
-	double fDirection = _tank.get_direction();
-	//ti.m_v TODO:tank
+	ti.m_fDirection = _tank.get_direction();
+	ti.m_fArmor = _tank.get_armor();
+	ti.m_fFuel = _tank.get_fuel();
+	ti.m_fMass = _tank.get_mass();
+	CPhisicsTank::OwnArtefacts artefactsids = _tank.get_artefacts();
+	m_world.get_artefact_info(artefactsids,ti.m_artefacts);
 	_tank.send_tankinfo(ti);
+}
+
+void CControl::process_command(const CGetExploitsInfoCmd& _cmd,CTank& _tank)
+{
+	CExploitsInfo eis;
+	m_world.get_exploits_info(_tank.get_TankID(),eis,_tank);
+	_tank.send_exploits_info(eis);
 }
 
 CGameWorld::~CGameWorld()
@@ -569,6 +589,7 @@ CGameWorld::~CGameWorld()
 
 CGameWorld::CGameWorld(CGameMap& _map)
 	:m_map(_map)
+	,m_nTankIDLast(0)
 {
 }
 
@@ -583,7 +604,7 @@ void CGameWorld::add_tank(
 {
 	srand((unsigned)time(NULL));
 	CAutoLock __al(m_critsect);
-	m_tanks.push_back(new CTank(_sClientComputerName,_sClientPipeName,_sServerPipeName,_sTeamName,_sTankName,_flag));
+	m_tanks.push_back(new CTank(_sClientComputerName,_sClientPipeName,_sServerPipeName,_sTeamName,_sTankName,_flag,m_nTankIDLast++));
 	CFPoint2D pos;
 	generate_position(pos);
 	m_tanks.back()->set_pos(pos);
@@ -621,25 +642,29 @@ void CGameWorld::generate_artefacts()
 	}
 }
 
-void CGameWorld::add_exploit(size_t _ticks,const CFPoint3D& _pos,CShell& _shell)
+void CGameWorld::add_exploit(
+	size_t _ticks,const CFPoint3D& _pos,CShell& _shell
+	,long _shellid,double _fly_time,long _nTankID
+	,double _fHit
+	)
 {
 	CAutoLock __al(m_critsect);
 	//if(!m_exploits.empty()) m_exploits.pop_front();
-	m_exploits.push_back(CExploit(_ticks,_pos));
-	std::vector<Point3DT<double> >::const_iterator 
-		it = _shell.m_path.begin()
-		,ite = _shell.m_path.end()
-		;
-	for(;it!=ite;++it)
-	{
-		m_exploits.back().m_pts.push_back(*it);
-	}
+	m_exploits.push_back(CExploit(_ticks,_pos,_shellid,_fly_time,_nTankID,_fHit));
+//	std::vector<Point3DT<double> >::const_iterator 
+//		it = _shell.m_path.begin()
+//		,ite = _shell.m_path.end()
+//		;
+//	for(;it!=ite;++it)
+//	{
+//		m_exploits.back().m_pts.push_back(*it);
+//	}
 }
 
-void CGameWorld::add_Shell(const CPhisicsTank& _tank)
+void CGameWorld::add_Shell(const CPhisicsTank& _tank,long _shotid,long _nTankID)
 {
 	CAutoLock __al(m_critsect);
-	m_Shells.push_back(new CShell());
+	m_Shells.push_back(new CShell(_shotid,_nTankID));
 	m_Shells.back()->init(_tank);
 }
 
@@ -670,5 +695,65 @@ void CGameWorld::get_tanksinfo(TanksInfoLst& _ti)
 		CTankInfoLI ti;
 		(*it)->get_info(ti);
 		_ti.push_back(ti);
+	}
+}
+
+void CGameWorld::get_artefact_info(const CPhisicsTank::OwnArtefacts& _artefactsids,std::list<CArtefactInfo>& _artefactsinfo)
+{
+	_artefactsinfo.clear();
+	CPhisicsTank::OwnArtefacts::const_iterator
+		it = _artefactsids.begin()
+		,ite = _artefactsids.end()
+		;
+	for(;it!=ite;++it)
+	{
+		VERIFY_DO(m_artefacts.find(*it)!=m_artefacts.end(),continue);
+		CArtefactInfo ai;
+		ai.m_fMass = m_artefacts[*it]->m_mass;
+		ai.m_type = m_artefacts[*it]->m_type;
+		ai.m_ID = m_artefacts[*it]->m_ID;
+		_artefactsinfo.push_back(ai);
+	}
+}
+
+void CGameWorld::get_exploits_info(long _nTankID,CExploitsInfo& _eis,CTank& _tank)
+{
+	CAutoLock __al(m_critsect);
+
+	_eis.m_exploits.clear();
+
+	CFPoint2D pos = _tank.get_pos();
+	size_t radarR = (long)singleton<CGameConsts>::get().radarR();
+	double scale = singleton<CGameConsts>::get().scale();
+	size_t width = singleton<CGameConsts>::get().width();
+	size_t height = singleton<CGameConsts>::get().height();
+	CFRect rc(
+		CFPoint2D(pos.x-radarR*scale,pos.y-radarR*scale)
+		,CFPoint2D(pos.x+radarR*scale,pos.y+radarR*scale)
+		);
+
+	Exploits::const_iterator
+		it = m_exploits.begin()
+		,ite = m_exploits.end()
+		;
+	for(;it!=ite;++it)
+	{
+		const CExploit& exp = *it;
+		CFPoint2D pt = CFPoint2D(exp.m_pos.x,exp.m_pos.y);
+		if(!(rc.inside(pt) || exp.m_nTankID==_nTankID)) continue;
+		CExploitInfo ei;
+		ei.m_fFlyTime = exp.m_fly_time;
+		ei.m_pt = exp.m_pos;
+		if(exp.m_nTankID==_nTankID)
+		{
+			ei.m_fHitPoints = exp.m_fHit;
+			ei.m_id = exp.m_shellid;
+		}
+		else
+		{
+			ei.m_fHitPoints = 0;
+			ei.m_id = -1;
+		}
+		_eis.m_exploits.push_back(ei);
 	}
 }

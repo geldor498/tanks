@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "MapGenerator.h"
+#include "GameConsts.h"
 
 
 CAvailable4Tanks::CAvailable4Tanks()
@@ -317,21 +318,30 @@ void CGameMap::generate(double _sz,double _maxheight)
 	MapDataT<double> data;
 	data.resize(m_objects.width(),m_objects.height());
 	FillPerlinNoise2D noise;
-	noise.add_frequency(0.01*1024/_sz,0.35);
-	noise.add_frequency(0.03*1024/_sz,0.20);
-	noise.add_frequency(0.06*1024/_sz,0.10);
+	double fFreq1 = singleton<CGameConsts>::get().get_NoiseGeneratorFreq1();
+	double fFreq2 = singleton<CGameConsts>::get().get_NoiseGeneratorFreq2();
+	double fFreq3 = singleton<CGameConsts>::get().get_NoiseGeneratorFreq3();
+	double fAmp1 = singleton<CGameConsts>::get().get_NoiseGeneratorAmp1();
+	double fAmp2 = singleton<CGameConsts>::get().get_NoiseGeneratorAmp2();
+	double fAmp3 = singleton<CGameConsts>::get().get_NoiseGeneratorAmp3();
+	noise.add_frequency(fFreq1*1024/_sz,fAmp1);
+	noise.add_frequency(fFreq2*1024/_sz,fAmp2);
+	noise.add_frequency(fFreq3*1024/_sz,fAmp3);
 	noise.restart();
 	data.transform(noise);
 	normdata(data);
-	set_objects(data,Obj_Tree,0.75,_maxheight);
+	double fMapGenTreeCoef = singleton<CGameConsts>::get().get_MapGenTreeCoef();
+	set_objects(data,Obj_Tree,fMapGenTreeCoef,_maxheight);
 	noise.restart();
 	data.transform(noise);
 	normdata(data);
-	set_objects(data,Obj_Water,0.75);
+	double fMapGenWaterCoef = singleton<CGameConsts>::get().get_MapGenWaterCoef();
+	set_objects(data,Obj_Water,fMapGenWaterCoef);
 	noise.restart();
 	data.transform(noise);
 	normdata(data);
-	set_objects(data,Obj_Rock,0.80,_maxheight);
+	double fMapGenRockCoef = singleton<CGameConsts>::get().get_MapGenRockCoef();
+	set_objects(data,Obj_Rock,fMapGenRockCoef,_maxheight);
 	create_tankavailablemap();
 }
 

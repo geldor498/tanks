@@ -126,7 +126,6 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="C:\programming\bsu.tanks\cpplibraries"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
@@ -202,11 +201,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\cpplibraries\controls\ListHelper.cpp"
+				RelativePath="..\..\..\cpplibraries\controls\ListHelper.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\cpplibraries\controls\listvbase.cpp"
+				RelativePath="..\..\..\cpplibraries\controls\listvbase.cpp"
 				>
 			</File>
 			<File

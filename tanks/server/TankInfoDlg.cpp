@@ -198,7 +198,7 @@ void CTeamInfoLstData::GetColumnHeader(int _col,CString& _str,int& _fmt)
 
 int CTeamInfoLstData::GetRows()
 {
-	return m_data.size();
+	return (int)m_data.size();
 }
 
 int CTeamInfoLstData::GetCols()

@@ -62,6 +62,7 @@ public:
 		return sqrt(_point.x*_point.x+_point.y*_point.y+_point.z*_point.z);
 	}
 
+
 	static double tr_x(double x){
 		double scale = singleton<CGameConsts>::get().scale();
 		double width = singleton<CGameConsts>::get().width();
@@ -128,7 +129,7 @@ public:
 		m_const_forces.x = m_const_forces.y = m_const_forces.z = 0.;
 		m_impulse_forces.x = m_impulse_forces.y = m_impulse_forces.z = 0.;
 		force_applied = true;
-		m_direction = 0.;
+		m_direction = 0;
 	};
 
 	CMassPoint(
@@ -167,6 +168,7 @@ public:
 		m_impulse_forces[1] = 0.;
 		m_impulse_forces[2] = 0.;
 	};
+
 /*	double mass(){return m_mass;}
 	void mass(double m){m_mass = m;} 
 
@@ -385,6 +387,7 @@ protected:
 	CMassPoint m_right_track_point;//условная точка соприкосновения правойй гусеницы с землей
 
 	ofstream  m_logger;
+
 	OwnArtefacts m_artefacts;
 	CCriticalSection m_critsect;
 	double m_r_velocity;
@@ -397,11 +400,11 @@ public:
 		m_mass = m_engine.m_mass + m_engine.m_fuel + m_turret.mass + m_chassis.m_mass;	
 		m_left_track_point.m_mass = m_right_track_point.m_mass = m_mass/2.;
 		//будем считать, что тип поверхности определяется только центром масс самого танка для упрощения
-		
+
 		Point3DT<double> vect;
 		vect.x = m_ort.y;
 		vect.y = -m_ort.x;
-		
+
 		m_right_track_point.m_mass_center = m_mass_center + 0.5*m_chassis.m_width* vect;
 		m_left_track_point.m_mass_center = m_mass_center  - 0.5*m_chassis.m_width* vect;
 		m_left_track_point.m_ort = m_right_track_point.m_ort = m_ort;	
@@ -466,6 +469,7 @@ public:
 	void update(double changeInTime)
 	{
 		CAutoLock __al(m_critsect);
+
 		//если у танка иссякла броня, то он не может двигается 
 		if(changeInTime == 0. || CPHelper::closeToZero(m_armor.m_count))
 			return;
@@ -495,14 +499,15 @@ public:
 		//модуль силы, которая будет приложена
 		force_left_track +=delta_left_track*m_engine.get_power();
 		force_right_track+=delta_right_track*m_engine.get_power();
-		
+
+
 
 		m_left_track_point.m_impulse_forces  = m_ort*force_left_track;
 		m_right_track_point.m_impulse_forces = m_ort*force_right_track;
 
 		m_left_track_point.m_acceleration = 1./m_left_track_point.m_mass *(m_left_track_point.m_const_forces + m_left_track_point.m_impulse_forces );
 		m_right_track_point.m_acceleration = 1./m_right_track_point.m_mass *(m_right_track_point.m_const_forces + m_right_track_point.m_impulse_forces );
-		
+
 		//есть все силы - как импульсные, так и векторные. поэтому можно найти результирующую
 		//силу для рассчета линейной динамики. сразу же найдем и линейное ускорение
 		m_acceleration = 1./m_mass *(m_left_track_point.m_const_forces + m_left_track_point.m_impulse_forces + m_right_track_point.m_const_forces + m_right_track_point.m_impulse_forces);
@@ -511,9 +516,11 @@ public:
 
 		//теперь у нас есть почти честно посчитанные модули скоростей
 		//нужно определить скорость центар масс (т.е. направление и величину).
+
+
 		m_chassis.m_power_left_track_current = m_chassis.m_power_left_track_required;
 		m_chassis.m_power_right_track_current = m_chassis.m_power_right_track_required;
-
+		
 		m_chassis.m_velocity_left_track = m_left_track_point.m_velocity;// =R>0? CPHelper::norm_2d(m_velocity)/R*r_lt*m_ort:m_velocity;
 		m_chassis.m_velocity_right_track = m_right_track_point.m_velocity;//s =R>0? CPHelper::norm_2d(m_velocity)/R*r_rt*m_ort:m_velocity;
 		//находим расстояние до оси вращения
@@ -521,7 +528,7 @@ public:
 		Point3DT<double> vect = m_ort;
 		vect.x = m_ort.y;
 		vect.y = -m_ort.x;
-		
+
 		Point3DT<double> p1, p2, v1,v2, tt;
 		p1 = m_mass_center + vect*m_chassis.m_width*0.5;//правая гусеница
 		p2 = m_mass_center - vect*m_chassis.m_width*0.5;//левая гусеница
@@ -557,7 +564,7 @@ public:
 		m_r_velocity += r_acceleration * changeInTime;
 		double delta_direction = m_r_velocity * changeInTime;
 		m_direction += delta_direction;
-			//и повернуть танк в нужном направлении
+		//и повернуть танк в нужном направлении
 		double c = cos(delta_direction);
 		double s = sin(delta_direction);
 
@@ -590,6 +597,7 @@ public:
 		m_engine.m_fuel -= d_fuel;
 		m_mass -=d_fuel;
 		m_left_track_point.m_mass = m_right_track_point.m_mass = m_mass/2.;
+
 	};
 	void stop_tank()
 	{
@@ -645,6 +653,18 @@ public:
 		CAutoLock __al(m_critsect);
 		return m_engine.m_fuel;
 	}
+
+	double get_mass() const 
+	{
+		CAutoLock __al(m_critsect);
+		return m_mass;
+	}
+
+	OwnArtefacts get_artefacts() const
+	{
+		CAutoLock __al(m_critsect);
+		return m_artefacts;
+	}
 };
 
 
@@ -653,7 +673,8 @@ public:
 //сие есть игровой объект типа снаряд. 
 //при каждом выстреле создается новый.
 //
-class CShell: public CGameObject{
+class CShell: public CGameObject
+{
 	double m_time_step;
 public:
 	double m_impulse_forces_module;//модуль сил, выталкивающих снаряд из орудия
@@ -663,7 +684,14 @@ public:
 	double m_time_passed;//сколько прошло времени с момента старта снаряда
 	std::vector<Point3DT<double> > m_path;//путь пройденный снарядом
 	bool m_interaction;//флаг взаиммодействия - если оно произошло, проверим близлежащие объектыф
-	CShell()
+	long m_id;
+	long m_nTankID;
+	double m_fHit;
+
+	CShell(long _id = -1,long _nTankID=-1)
+		:m_id(_id)
+		,m_nTankID(_nTankID)
+		,m_fHit(0)
 	{
 		m_time_step= 1./50.;
 		m_mass = singleton<CGameConsts>::get().get_ShellMass();
@@ -694,7 +722,6 @@ public:
 		ort.z = s*sqrt(sqr(ort.x) + sqr(ort.y) + sqr(ort.z));
 		ort.x *= c;
 		ort.y *= c;
-
 		
 		m_mass_center = _tank.m_mass_center;
 		m_mass_center.z = 2.;
@@ -707,8 +734,10 @@ public:
 	};
 
 
-	void evaluate_path(){
-		while(m_mass_center.z>0.){			
+	void evaluate_path()
+	{
+		while(m_mass_center.z>0.)
+		{			
 			m_const_forces = (-1)* m_air_resistance_coefficient * m_velocity ;
 			m_const_forces.z += (-1)*m_mass*singleton<CGameConsts>::get().PH_g();
 			CGameObject::update(m_time_step);
@@ -717,7 +746,8 @@ public:
 	};
 
 
-	void update(double changeInTime){
+	void update(double changeInTime)
+	{
 		m_time_passed +=changeInTime;
 
 		unsigned int index = (unsigned int)(m_time_passed/m_time_step);	
@@ -729,6 +759,21 @@ public:
 		{
 			m_mass_center = m_path[m_path.size()-1];
 		}
+	}
+
+	double get_fly_time() const 
+	{
+		return m_time_passed;
+	}
+
+	long get_id() const
+	{
+		return m_id;
+	}
+
+	long get_tank_id() const
+	{
+		return m_nTankID;
 	}
 
 	bool fallback() const 
@@ -765,6 +810,7 @@ public:
 				//поэтому просто добавим ее к броне
 				_tank.modify_armor(-_shell.m_killability+_shell.m_killability2);
 				_shell.m_interaction = true;
+				_shell.m_fHit += _shell.m_killability-_shell.m_killability2;
 			}
 		}
 		else
@@ -772,6 +818,7 @@ public:
 			if(CPHelper::norm2_3d(tmp)<pow(_tank.m_sphereRadious + _shell.m_sphere2,2))
 			{
 				_tank.modify_armor(-_shell.m_killability2);
+				_shell.m_fHit += _shell.m_killability2;
 			}
 		}	
 	};

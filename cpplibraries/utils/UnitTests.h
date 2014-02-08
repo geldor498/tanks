@@ -12,6 +12,7 @@
 #include <objbase.h>
 
 #include "utils.h"
+#include "convert.h"
 
 /**\defgroup SimpleUnitTests Utilities library support for simple unit tests
 This classes and macroses help you to build simple unit tests. You need this classes 
@@ -265,6 +266,107 @@ protected:
 	bool m_bVerbose;				///< use verbose mode or not
 };
 
+/**\brief simple implementation of \ref IUnitTest
+This class output to CString
+*/
+struct CUnitTestsOverString : public IUnitTest
+{
+	/**\brief constructor
+	\param[in] _bVerbose -- if verbose mode is true than will be showen all tests 
+	                        and if they are started with _T("OK -- ")
+							then test pass ok.
+	*/
+	CUnitTestsOverString(bool _bVerbose = false)
+		:m_AllTestsCount(0)
+		,m_FailedTestsCount(0)
+		,m_bVerbose(_bVerbose)
+	{
+	}
+
+	/**\brief function that implements \ref IUnitTest::test()
+	\param _cond -- condition to verify
+	\param _szDescription -- description of error (if _cond is false)
+	\param _szModule -- tests module
+	\param _szTestName -- test name
+	\param _szFile -- position in units test file 
+	\param _nLine -- line number of error in units test file
+	*/
+	virtual void test(
+		bool _cond
+		,LPCTSTR _szDescription,LPCTSTR _szModule,LPCTSTR _szTestName
+		,LPCTSTR _szFile,long _nLine
+		)
+	{
+		m_AllTestsCount++;
+		if(_cond) 
+		{
+			if(!m_bVerbose) return;
+			m_sTestResults += _T("OK -- ");
+#if defined(TRACE_UNITTESTS_MESSAGES)
+			TRACE_(_T("OK -- "));
+#endif
+		}
+		m_sTestResults += _szFile;
+		m_sTestResults += _T("(");
+		m_sTestResults += common::to_str(_nLine);
+		m_sTestResults += _T("):");
+		m_sTestResults += _szDescription;
+		m_sTestResults += _T("\n");
+		m_sTestResults += _T("    in module : ");
+		m_sTestResults += unnull(_szModule);
+		m_sTestResults += _T("\n");
+		m_sTestResults += _T("    test name : ");
+		m_sTestResults += unnull(_szTestName);
+		m_sTestResults += _T("\n");
+
+#if defined(TRACE_UNITTESTS_MESSAGES)
+		TRACE_(_T("%s(%d):%s\n\tin module : %s\n\ttest name : %s\n")
+			,_szFile,_nLine
+			,_szDescription
+			,_szModule,_szTestName
+			);
+#endif
+		if(!_cond) m_FailedTestsCount++;
+	}
+
+	/**\brief function that output to std::cerr tests results
+	*/
+	void result()
+	{
+		std::cerr << _T("All tests count :") << m_AllTestsCount << std::endl
+			<< _T("Failed tests count :") << m_FailedTestsCount << std::endl
+			;
+
+#if defined(TRACE_UNITTESTS_MESSAGES)
+		TRACE_(_T("All tests count : %d\nFailed tests count : %d\n")
+			,m_AllTestsCount,m_FailedTestsCount
+			);
+#endif
+
+		if(m_FailedTestsCount==0)
+			std::cerr << _T("All tests was successfully passed") << std::endl;
+		else
+			std::cerr << _T("There was error while tests passing") << std::endl;
+
+#if defined(TRACE_UNITTESTS_MESSAGES)
+		if(m_FailedTestsCount==0)
+			TRACE_(_T("All tests was successfully passed\n"));
+		else
+			TRACE_(_T("There was error while tests passing\n"));
+#endif
+
+	}
+	long get_all_test_count() const {return m_AllTestsCount;}
+	long get_failed_test_count() const {return m_FailedTestsCount;}
+	const CString& get_test_results() const {return m_sTestResults;}
+protected:
+	long m_AllTestsCount;			///< tests counter
+	long m_FailedTestsCount;		///< count of failed tests
+	bool m_bVerbose;				///< use verbose mode or not
+	CString m_sTestResults;
+};
+
+
 //@}
 
 /**\page Page_QuickStart_SimpleUnitTest Quick start: "Simple unit tests in the utities library"
@@ -276,7 +378,7 @@ Lets see steps you need to implement to realize unit tests:
 	-# create test suite
 	-# and create tests
 	.
-
+	
 Lets see code snippet that illustrate this steps
 \code
 

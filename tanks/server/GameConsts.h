@@ -37,7 +37,7 @@ public:
 		m_fChassisMass = 2000;
 		m_fMaxVelocity = 20;
 		m_fChassisWidth = 3;
-		m_fEnginePower = 1000;
+		m_fEnginePower = 1500;
 		m_fEngineMass = 1000;
 		m_fEngineFuel = 1000;
 		m_fFuelConsumptionCoef = 0.1;
@@ -51,6 +51,15 @@ public:
 		m_fArmorArtefactCount = 1000;
 		m_fArmorArtefactMass = 1000;
 		m_fFuelArtefactMass = 100;
+		m_fNoiseGeneratorFreq1 = 0.01;
+		m_fNoiseGeneratorFreq2 = 0.03;
+		m_fNoiseGeneratorFreq3 = 0.06;
+		m_fNoiseGeneratorAmp1 = 0.35;
+		m_fNoiseGeneratorAmp2 = 0.20;
+		m_fNoiseGeneratorAmp3 = 0.10;
+		m_fMapGenTreeCoef = 0.75;
+		m_fMapGenWaterCoef = 0.75;
+		m_fMapGenRockCoef = 0.80;
 
 		//load();
 	}
@@ -90,13 +99,22 @@ public:
 	double get_ArmorArtefactCount() const {return m_fArmorArtefactCount;}
 	double get_ArmorArtefactMass() const {return m_fArmorArtefactMass;} 
 	double get_FuelArtefactMass() const {return m_fFuelArtefactMass;}
+	double get_NoiseGeneratorFreq1() const {return m_fNoiseGeneratorFreq1;}
+	double get_NoiseGeneratorFreq2() const {return m_fNoiseGeneratorFreq2;}
+	double get_NoiseGeneratorFreq3() const {return m_fNoiseGeneratorFreq3;}
+	double get_NoiseGeneratorAmp1() const {return m_fNoiseGeneratorAmp1;}
+	double get_NoiseGeneratorAmp2() const {return m_fNoiseGeneratorAmp2;}
+	double get_NoiseGeneratorAmp3() const {return m_fNoiseGeneratorAmp3;}
+	double get_MapGenTreeCoef() const {return m_fMapGenTreeCoef;}
+	double get_MapGenWaterCoef() const {return m_fMapGenWaterCoef;}
+	double get_MapGenRockCoef() const {return m_fMapGenRockCoef;}
 protected:
 	double m_minpassability;
-	size_t m_width;
-	size_t m_height;
+	unsigned int m_width;
+	unsigned int m_height;
 	double m_scale;
 	double m_rockheight;
-	size_t m_radarR;
+	unsigned int m_radarR;
 	double m_fPH_g;
 	double m_fHorseStrength;
 	double m_fSphereRadius;
@@ -123,6 +141,15 @@ protected:
 	double m_fArmorArtefactCount;
 	double m_fArmorArtefactMass;
 	double m_fFuelArtefactMass;
+	double m_fNoiseGeneratorFreq1;
+	double m_fNoiseGeneratorFreq2;
+	double m_fNoiseGeneratorFreq3;
+	double m_fNoiseGeneratorAmp1;
+	double m_fNoiseGeneratorAmp2;
+	double m_fNoiseGeneratorAmp3;
+	double m_fMapGenTreeCoef;
+	double m_fMapGenWaterCoef;
+	double m_fMapGenRockCoef;
 
 public:
 	struct DefaultLayout : public Layout<CGameConsts>
@@ -161,6 +188,15 @@ public:
 			add_simple(_T("ArmorArtefactCount"),&CGameConsts::m_fArmorArtefactCount);
 			add_simple(_T("ArmorArtefactMass"),&CGameConsts::m_fArmorArtefactMass);
 			add_simple(_T("FuelArtefactMass"),&CGameConsts::m_fFuelArtefactMass);
+			add_simple(_T("NoiseGeneratorFreq1"),&CGameConsts::m_fNoiseGeneratorFreq1);
+			add_simple(_T("NoiseGeneratorFreq2"),&CGameConsts::m_fNoiseGeneratorFreq2);
+			add_simple(_T("NoiseGeneratorFreq3"),&CGameConsts::m_fNoiseGeneratorFreq3);
+			add_simple(_T("NoiseGeneratorAmp1"),&CGameConsts::m_fNoiseGeneratorAmp1);
+			add_simple(_T("NoiseGeneratorAmp2"),&CGameConsts::m_fNoiseGeneratorAmp2);
+			add_simple(_T("NoiseGeneratorAmp3"),&CGameConsts::m_fNoiseGeneratorAmp3);
+			add_simple(_T("MapGenTreeCoef"),&CGameConsts::m_fMapGenTreeCoef);
+			add_simple(_T("MapGenWaterCoef"),&CGameConsts::m_fMapGenWaterCoef);
+			add_simple(_T("MapGenRockCoef"),&CGameConsts::m_fMapGenRockCoef);
 		}
 	};
 

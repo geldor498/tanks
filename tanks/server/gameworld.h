@@ -18,18 +18,35 @@ class CGameView;
 
 struct CExploit
 {
-	CExploit(size_t _ticks = 0,const CFPoint3D& _pos = CFPoint3D(0,0,0))
+	CExploit(
+		size_t _ticks = 0
+		,const CFPoint3D& _pos = CFPoint3D(0,0,0)
+		,long _shellid=-1
+		,double _fly_time=0
+		,long _nTankID=-1
+		,double _fHit = 0
+		)
 	{
 		m_maxticks = m_ticks = _ticks;
 		m_pos = _pos;
 		m_r = 1.0;
+		m_shellid = _shellid;
+		m_fly_time = _fly_time;
+		m_nTankID = _nTankID;
+		time(&m_nCreationtTime);
+		m_fHit = _fHit;
 	}
 
 	size_t m_maxticks;
 	size_t m_ticks;
 	double m_r;
 	CFPoint3D m_pos;
-	std::list<CFPoint3D> m_pts;
+	long m_shellid;
+	long m_nTankID;
+	double m_fly_time;
+	time_t m_nCreationtTime;
+	double m_fHit;
+	//std::list<CFPoint3D> m_pts;
 
 	void next_tick(double _dr)
 	{
@@ -55,6 +72,7 @@ protected:
 	Exploits m_exploits;
 	CCriticalSection m_critsect;
 	CGameMap& m_map;
+	long m_nTankIDLast;
 
 public:
 	~CGameWorld();
@@ -67,11 +85,13 @@ public:
 		,const CString& _sTankName
 		,const CFlagColor (&_flag)[3]
 		);
-	void add_Shell(const CPhisicsTank& _tank);
+	void add_Shell(const CPhisicsTank& _tank,long _shotid,long _nTankID);
 	void generate_position(CFPoint2D& _pos);
 	void generate_artefacts();
-	void add_exploit(size_t _ticks,const CFPoint3D& _pos,CShell& _shell);
+	void add_exploit(size_t _ticks,const CFPoint3D& _pos,CShell& _shell,long _shellid,double _fly_time,long _nTankID,double _fHit);
 	void get_tanksinfo(TanksInfoLst& _ti);
+	void get_artefact_info(const CPhisicsTank::OwnArtefacts& _artefactsids,std::list<CArtefactInfo>& _artefactsinfo);
+	void get_exploits_info(long _nTankID,CExploitsInfo& _ei,CTank& _tank);
 protected:
 	void free();
 
@@ -100,6 +120,7 @@ public:
 	void process_command(const CPutArtefactCmd& _cmd,CTank& _tank);
 	void process_command(const CGetRadarInfoCmd& _cmd,CTank& _tank);
 	void process_command(const CGetTankInfoCmd& _cmd,CTank& _tank);
+	void process_command(const CGetExploitsInfoCmd& _cmd,CTank& _tank);
 };//class CControl
 
 class CGameView
