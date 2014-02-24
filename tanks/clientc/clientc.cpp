@@ -17,6 +17,7 @@ CWinApp theApp;
 
 using namespace std;
 
+
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 	// initialize MFC and print and error on failure
@@ -108,6 +109,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			case 'i':
 				std::cout << "get information\n";
 				tank.get_radarinfo(ri);
+				print_ri(ri);
 				break;
 			case 'w':
 				{

@@ -42,7 +42,7 @@ struct CTank : public CClientTank
 
 	void shot()
 	{
-		CClientTank::shot(m_fTurretAngle,m_fGunAngle, m_bShot);
+		CClientTank::shot(m_fTurretAngle,m_fGunAngle, m_bShot,1);
 	}
 
 protected:
@@ -52,3 +52,34 @@ protected:
 	double m_fRightTrackSpeed;
 	bool m_bShot;
 };//struct CTank
+
+CString to_str(ObjectEn _obj)
+{
+	switch(_obj)
+	{
+	case Obj_Null:		return _T(".");
+	case Obj_Ground:	return _T("_");
+	case Obj_Water:		return _T("~");
+	case Obj_Tree:		return _T("T");
+	case Obj_Rock:		return _T("O");
+	default:
+		return _T(":");
+	}
+}
+
+void print_ri(const CRadarInfo& _ri)
+{
+	long sz = _ri.m_sz;
+	long x = 0,y = 0;
+	for(y=0;y<sz;y++)
+	{
+		for(x=0;x<sz;x++)
+		{
+			double h = 0;
+			ObjectEn obj = _ri.get_object(x,y,h);
+			if(EQL(x,sz/2) && EQL(y,sz/2)) std::cout << "+";
+			else if(x<78) std::wcout << (LPCTSTR)to_str(obj);
+		}
+		std::cout << "\n";
+	}
+}
