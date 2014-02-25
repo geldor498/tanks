@@ -419,7 +419,7 @@ struct CRadarInfo
 			return Obj_Tree;
 		}
 		double rockheight = singleton<CGameConsts>::get().rockheight();
-		const long maxv = (1<<sizeof(TCHAR)) - 1 - g_rocksym;
+		const long maxv = (1<<(sizeof(TCHAR)*8)) - 1 - g_rocksym;
 		_height = (double)(ch-g_rocksym)/maxv*rockheight;
 		return Obj_Rock;
 	}
@@ -445,7 +445,7 @@ struct CRadarInfo
 			break;
 		}
 		double rockheight = singleton<CGameConsts>::get().rockheight();
-		const long maxv = (1<<sizeof(TCHAR)) - 1 - g_rocksym;
+		const long maxv = (1<<(sizeof(TCHAR)*8)) - 1 - g_rocksym;
 		TCHAR ch = (TCHAR)floor(_height/rockheight*maxv);
 		m_map.SetAt(pos,g_rocksym+ch);
 	}

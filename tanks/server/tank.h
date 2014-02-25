@@ -52,6 +52,7 @@ protected:
 	double m_LTrackPos;
 	double m_RTrackPos;
 	long m_nTankID;
+	HANDLE m_hGameFlag;
 
 protected:
 	CCriticalSection m_critsect;
@@ -64,12 +65,14 @@ public:
 		,const CString& _sTankName
 		,const CFlagColor (&_flag)[3]
 		,long _nTankID
+		,HANDLE _hGameFlag
 		)	
 		:CServerPipeCommImpl(_sServerPipeName)
 		,m_LTrackPos(0)
 		,m_RTrackPos(0)
 		,m_sTeamName(_sTeamName)
 		,m_sTankName(_sTankName)
+		,m_hGameFlag(_hGameFlag)
 	{
 		m_nTankID = _nTankID;
 		start();
@@ -85,7 +88,10 @@ public:
 	template<typename _Message>
 	bool process(_Message* _pmsg)
 	{
-		return CMessagesQueue::process(_pmsg);
+		//if(is_signaled(m_hGameFlag,0))
+			return CMessagesQueue::process(_pmsg);
+		//else
+		//	return true;
 	}
 
 	CString get_name() const {return m_sTankName;}

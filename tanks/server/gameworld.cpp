@@ -237,6 +237,7 @@ void CGameView::draw_artefacts()
 	for(;it!=ite;++it)
 	{
 		const CArtefact* partefact = it->second;
+		if(partefact->m_occupied) continue;
 		
 		glPushMatrix();
 		glTranslated(partefact->m_mass_center.x,partefact->m_mass_center.z,partefact->m_mass_center.y);
@@ -548,6 +549,7 @@ void CControl::process_command(const CGetRadarInfoCmd& _cmd,CTank& _tank)
 		for(;ait!=aite;++ait)
 		{
 			const CArtefact* part = ait->second;
+			if(part->m_occupied) continue;
 			CFPoint2D pos(part->m_mass_center.x,part->m_mass_center.y);
 			if(rc.inside(pos))
 			{
@@ -587,9 +589,10 @@ CGameWorld::~CGameWorld()
 	free();
 }
 
-CGameWorld::CGameWorld(CGameMap& _map)
+CGameWorld::CGameWorld(CGameMap& _map,HANDLE _hGameFlag)
 	:m_map(_map)
 	,m_nTankIDLast(0)
+	,m_hGameFlag(_hGameFlag)
 {
 }
 
@@ -604,7 +607,7 @@ void CGameWorld::add_tank(
 {
 	srand((unsigned)time(NULL));
 	CAutoLock __al(m_critsect);
-	m_tanks.push_back(new CTank(_sClientComputerName,_sClientPipeName,_sServerPipeName,_sTeamName,_sTankName,_flag,m_nTankIDLast++));
+	m_tanks.push_back(new CTank(_sClientComputerName,_sClientPipeName,_sServerPipeName,_sTeamName,_sTankName,_flag,m_nTankIDLast++,m_hGameFlag));
 	CFPoint2D pos;
 	generate_position(pos);
 	m_tanks.back()->set_pos(pos);

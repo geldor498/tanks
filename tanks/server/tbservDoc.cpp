@@ -25,10 +25,10 @@ END_MESSAGE_MAP()
 
 CTBServDoc::CTBServDoc()
 :
-	m_gameworld(m_map)
+	m_gameflag(FALSE,TRUE)
+	,m_gameworld(m_map,m_gameflag)
 	,m_connectionserver(m_gameworld)
 	,m_control(m_gameworld,m_map)
-	,m_gameflag(FALSE,TRUE)
 {
 	// TODO: add one-time construction code here
 	start();

@@ -73,10 +73,11 @@ protected:
 	CCriticalSection m_critsect;
 	CGameMap& m_map;
 	long m_nTankIDLast;
+	HANDLE m_hGameFlag;
 
 public:
 	~CGameWorld();
-	CGameWorld(CGameMap& _map);
+	CGameWorld(CGameMap& _map,HANDLE _hGameFlag);
 	void add_tank(
 		const CString& _sClientComputerName
 		,const CString& _sClientPipeName
