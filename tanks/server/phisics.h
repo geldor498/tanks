@@ -90,6 +90,10 @@ public:
 	static double scalar_product2d(Point3DT<double>&v1, Point3DT<double>&v2){
 		return v1.x*v2.x + v1.y*v2.y;
 	}
+
+	static void print2dvect(Point3DT<double> &v, ofstream& out ){
+		out<<v.x<<" "<<v.y<<std::endl;
+	}
 };
 class CPhisicsWorld{
 public:
@@ -386,12 +390,13 @@ protected:
 	CMassPoint m_left_track_point;//условная точка соприкосновения левой гусеницы с землей
 	CMassPoint m_right_track_point;//условная точка соприкосновения правойй гусеницы с землей
 
-	ofstream  m_logger;
+	
 
 	OwnArtefacts m_artefacts;
 	CCriticalSection m_critsect;
 	double m_r_velocity;
 public:
+	ofstream  m_logger;
 
 	CPhisicsTank()
 	{
@@ -466,6 +471,25 @@ public:
 		m_turret.c_TurretAngle  = shot.m_fTurretAngle;
 	}
 	//пересчитываем физику 
+	void log()
+	{
+		m_logger<<"==========log=========="<<std::endl;
+		m_logger<<"m_mass_crnter: \t"<<m_mass_center.x<<" "<<m_mass_center.y<<std::endl;
+		m_logger<<"m_velocity: \t "<<m_velocity.x<<" "<<m_velocity.y<<std::endl;
+		m_logger<<"m_acceleration: \t"<<m_acceleration.x<<" "<<m_acceleration.y<<std::endl;
+		m_logger<<"m_const_forces: \t"<<m_const_forces.x<<" "<<m_const_forces.y<<std::endl;
+		m_logger<<"m_impulse_forces: \t"<<m_impulse_forces.x<<" "<<m_impulse_forces.y<<std::endl;
+		m_logger<<"m_lt cur req: \t"<<m_chassis.m_power_left_track_current<<" "<<m_chassis.m_power_left_track_required<<std::endl;
+		m_logger<<"m_rt cur req: \t"<<m_chassis.m_power_right_track_current<<" "<<m_chassis.m_power_right_track_required<<std::endl;
+		m_logger<<"m_lt imp forces: \t"<<m_left_track_point.m_impulse_forces.x <<"  "<<m_left_track_point.m_impulse_forces.y<<std::endl;
+		m_logger<<"m_lt con forces: \t"<<m_left_track_point.m_const_forces.x <<"  "<<m_left_track_point.m_const_forces.y<<std::endl;
+		m_logger<<"m_rt imp forces: \t"<<m_left_track_point.m_impulse_forces.x <<"  "<<m_right_track_point.m_impulse_forces.y<<std::endl;
+		m_logger<<"m_rt con forces: \t"<<m_left_track_point.m_const_forces.x <<"  "<<m_right_track_point.m_const_forces.y<<std::endl;
+		m_logger<<"m_lt   velocity: \t"<<m_left_track_point.m_velocity.x <<"  "<<m_left_track_point.m_velocity.y<<std::endl;
+		m_logger<<"m_rt   velocity: \t"<<m_right_track_point.m_velocity.x <<"  "<<m_right_track_point.m_velocity.y<<std::endl;
+
+		m_logger<<std::endl<<std::endl<<std::endl;
+	}
 	void update(double changeInTime)
 	{
 		CAutoLock __al(m_critsect);
@@ -473,14 +497,15 @@ public:
 		//если у танка иссякла броня, то он не может двигается 
 		if(changeInTime == 0. || CPHelper::closeToZero(m_armor.m_count))
 			return;
+		
 		m_chassis.m_power_left_track_required  = fabs(m_chassis.m_power_left_track_required)<1.?m_chassis.m_power_left_track_required:CPHelper::signum(m_chassis.m_power_left_track_required);
 		m_chassis.m_power_right_track_required = fabs(m_chassis.m_power_right_track_required)<1.?m_chassis.m_power_right_track_required:CPHelper::signum(m_chassis.m_power_right_track_required);
 		double delta_left_track = m_chassis.m_power_left_track_required - m_chassis.m_power_left_track_current;
 		double delta_right_track= m_chassis.m_power_right_track_required - m_chassis.m_power_right_track_current;
 		//double delta_rot = m_chassis.m_power_right_track_required - m_chassis.m_power_left_track_required;
 
-		double signum_const_forces_lt =( m_ort.x!=0.?m_left_track_point.m_velocity.x/m_ort.x:m_left_track_point.m_velocity.y/m_ort.y);
-		double signum_const_forces_rt =( m_ort.x!=0.?m_right_track_point.m_velocity.x/m_ort.x:m_right_track_point.m_velocity.y/m_ort.y);
+		double signum_const_forces_lt = CPHelper::signum( m_ort.x!=0.?m_left_track_point.m_velocity.x/m_ort.x:m_left_track_point.m_velocity.y/m_ort.y);
+		double signum_const_forces_rt = CPHelper::signum( m_ort.x!=0.?m_right_track_point.m_velocity.x/m_ort.x:m_right_track_point.m_velocity.y/m_ort.y);
 		//m_right_track_point
 		//проверяем, двигается ли танк сонаправленно орту или в противоположном напрвлении
 
@@ -504,7 +529,17 @@ public:
 
 		m_left_track_point.m_impulse_forces  = m_ort*force_left_track;
 		m_right_track_point.m_impulse_forces = m_ort*force_right_track;
-
+//m_logger<<" lt
+//print2dvect()
+//log();
+		if(CPHelper::norm2_2d(m_left_track_point.m_const_forces) > CPHelper::norm2_2d( m_left_track_point.m_impulse_forces) 
+			&& CPHelper::norm2_2d(m_right_track_point.m_const_forces)>CPHelper::norm2_2d( m_right_track_point.m_impulse_forces)
+			&& CPHelper::closeToZero(CPHelper::norm_2d(m_velocity))
+			&& CPHelper::closeToZero(CPHelper::norm_2d(m_acceleration))){
+			//m_logger<<"      no move!!! so sad!"<<std::endl;
+			return;
+		}
+		
 		m_left_track_point.m_acceleration = 1./m_left_track_point.m_mass *(m_left_track_point.m_const_forces + m_left_track_point.m_impulse_forces );
 		m_right_track_point.m_acceleration = 1./m_right_track_point.m_mass *(m_right_track_point.m_const_forces + m_right_track_point.m_impulse_forces );
 
@@ -602,16 +637,38 @@ public:
 	void stop_tank()
 	{
 		CAutoLock __al(m_critsect);
+		
+		Point3DT<double> zeroPoint(0.,0.,0.);
+		
+		m_velocity = zeroPoint;
+		m_acceleration = zeroPoint;
 
-		m_velocity = Point3DT<double>(0,0,0);
-		m_acceleration = Point3DT<double>(0,0,0);
+		m_chassis.m_power_left_track_current = 0.;
+		m_chassis.m_power_right_track_current = 0.;
 
-		m_chassis.m_power_left_track_current = 0;
-		m_chassis.m_power_right_track_current = 0;
+		m_chassis.m_power_left_track_required = 0.;
+		m_chassis.m_power_right_track_required = 0.;
 
-		m_chassis.m_power_left_track_required = 0;
-		m_chassis.m_power_right_track_required = 0;
+		m_const_forces = zeroPoint;
+		m_impulse_forces = zeroPoint;
+
+		m_left_track_point.m_const_forces = zeroPoint;
+		m_left_track_point.m_impulse_forces = zeroPoint;
+
+		m_right_track_point.m_const_forces = zeroPoint;
+		m_right_track_point.m_impulse_forces = zeroPoint;
+
+		m_right_track_point.m_velocity = zeroPoint;
+		m_left_track_point.m_velocity = zeroPoint;
 	};
+
+
+	//применяется при столкновениях с ландшафтом.
+	//возвращает танк на некоторое расстояние в обратном направлении не разворачивая его
+	void retrieve_tank(double _len, int _sign){
+		CAutoLock __al(m_critsect);
+		m_mass_center -= _sign * _len * m_ort;
+	}
 
 	double get_turret_angle() const 
 	{
@@ -627,9 +684,12 @@ public:
 
 	void modify_armor(double _delta_armor)
 	{
-		CAutoLock __al(m_critsect);
+		CAutoLock __al(m_critsect);		
 		m_armor.m_count += _delta_armor;
+		if(m_armor.m_count <=0.)
+			m_armor.m_count = 0;
 	}
+
 	void modify_fuel(double _delta_fuel)
 	{
 		CAutoLock __al(m_critsect);
@@ -826,19 +886,31 @@ public:
 	//столкновение с ландшафтом.
 	static void collision(CPhisicsTank& _tank, const CGameMap& _map)
 	{
+		//скорость танка до столкновения. 
+		Point3DT<double> tmp_velocity = _tank.m_velocity;
+		int sign = CPHelper::signum( _tank.m_ort.x!=0.?tmp_velocity.x/_tank.m_ort.x:tmp_velocity.y/_tank.m_ort.y);
+		
+		//дистанция, которую прошел танк в препятствии. вычисляется приблизительно - 
+		//для простоты считаем, что время движения с указанной скоростью - 0.1 секунды
+		double distance = 0.3 * CPHelper::norm_2d(tmp_velocity);
+		
 		//находим точки, которые будем проверять на столкновение 
 		Point3DT<double> tmp = _tank.m_mass_center;
 		tmp =  _tank.m_mass_center+_tank.m_sphereRadious * _tank.m_ort;
 
 		if( _map.get_height((size_t)CPHelper::tr_x(tmp.x), (size_t)CPHelper::tr_y(tmp.y)) > 0 
 			|| _map.get_passability((size_t)CPHelper::tr_x(tmp.x), (size_t)CPHelper::tr_y(tmp.y)) == 0.){
+			//_tank.m_logger<<"  badabooom!!!!!"<<std::endl;
 			_tank.stop_tank();
+			_tank.retrieve_tank(distance, sign);
 		}
 		tmp =  _tank.m_mass_center-_tank.m_sphereRadious * _tank.m_ort;
 
 		if(_map.get_height((size_t)CPHelper::tr_x(tmp.x), (size_t)CPHelper::tr_y(tmp.y)) > 0 
 			|| _map.get_passability((size_t)CPHelper::tr_x(tmp.x), (size_t)CPHelper::tr_y(tmp.y)) == 0.){
+			//_tank.m_logger<<"  badabooom!!!!!"<<std::endl;
 			_tank.stop_tank();
+			_tank.retrieve_tank(distance, sign);
 		}
 	};
 
@@ -850,8 +922,6 @@ public:
 			_shell.m_interaction = true;
 	};
 };
-
-
 
 class CArmorArtefact: public CArtefact{
 public:
