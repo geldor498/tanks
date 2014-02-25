@@ -495,6 +495,7 @@ struct CTankInfo
 	GET_MESSAGEGUID(CTankInfo)
 
 	CFPoint2D m_pos;
+	CFPoint2D m_fOrt;
 	double m_fDirection;
 	double m_fVLeftTrack;
 	double m_fVRightTrack;
@@ -502,6 +503,7 @@ struct CTankInfo
 	double m_fArmor;
 	double m_fFuel;
 	std::list<CArtefactInfo> m_artefacts;
+	
 
 	CTankInfo()
 		:m_fMass(0)
@@ -518,6 +520,7 @@ struct CTankInfo
 		DefaultLayout()
 		{
 			add_struct(_T("position"),&CTankInfo::m_pos,get_structlayout<CFPoint2D>());
+			add_struct(_T("ort"),&CTankInfo::m_fOrt,get_structlayout<CFPoint2D>());
 			add_simple(_T("direction"),&CTankInfo::m_fDirection);
 			add_simple(_T("mass"),&CTankInfo::m_fMass);
 			add_simple(_T("VLeftTrack"),&CTankInfo::m_fVLeftTrack);

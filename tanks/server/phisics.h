@@ -731,6 +731,15 @@ public:
 		return m_mass;
 	}
 
+	CFPoint2D get_ort(){
+		CAutoLock __al(m_critsect);
+		CFPoint2D res;
+		res.x = m_ort.x;
+		res.y = m_ort.y;
+
+		return res;
+	}
+
 	OwnArtefacts get_artefacts() const
 	{
 		CAutoLock __al(m_critsect);
