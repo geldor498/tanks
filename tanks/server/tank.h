@@ -161,8 +161,8 @@ public:
 	void get_state(double& _ltarck,double& _rtrack,double& _turretangle,double& _gunangle) const
 	{
 		CAutoLock __al(m_critsect);
-		_ltarck = m_LTrackPos;
-		_rtrack = m_RTrackPos;
+		_ltarck = CPHelper::norm_2d(m_chassis.m_velocity_left_track);
+		_rtrack = CPHelper::norm_2d(m_chassis.m_velocity_right_track);
 		_turretangle = m_turret.n_TurretAngle;
 		_gunangle = m_turret.n_GunAngle;
 	}
