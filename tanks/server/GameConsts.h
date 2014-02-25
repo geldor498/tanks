@@ -60,6 +60,7 @@ public:
 		m_fMapGenTreeCoef = 0.75;
 		m_fMapGenWaterCoef = 0.75;
 		m_fMapGenRockCoef = 0.80;
+		m_fRechargeTime = 3.;
 
 		//load();
 	}
@@ -75,6 +76,7 @@ public:
 	double rockheight() const {return m_rockheight;}
 	size_t radarR() const {return m_radarR;}
 	double PH_g() const {return m_fPH_g;}
+	double RechargeTime() const {return m_fRechargeTime;}
 	double HorseStrength() const {return m_fHorseStrength;}
 	double get_SphereRadius() const {return m_fSphereRadius;}
 	double get_AirResistanceCoef() const {return m_fAirResistanceCoef;}
@@ -150,6 +152,7 @@ protected:
 	double m_fMapGenTreeCoef;
 	double m_fMapGenWaterCoef;
 	double m_fMapGenRockCoef;
+	double m_fRechargeTime;
 
 public:
 	struct DefaultLayout : public Layout<CGameConsts>
@@ -197,6 +200,7 @@ public:
 			add_simple(_T("MapGenTreeCoef"),&CGameConsts::m_fMapGenTreeCoef);
 			add_simple(_T("MapGenWaterCoef"),&CGameConsts::m_fMapGenWaterCoef);
 			add_simple(_T("MapGenRockCoef"),&CGameConsts::m_fMapGenRockCoef);
+			add_simple(_T("RechargeTime"),&CGameConsts::m_fRechargeTime);			
 		}
 	};
 

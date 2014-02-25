@@ -661,11 +661,13 @@ void CGameWorld::add_exploit(
 //	}
 }
 
-void CGameWorld::add_Shell(const CPhisicsTank& _tank,long _shotid,long _nTankID)
+void CGameWorld::add_Shell( CPhisicsTank& _tank,long _shotid,long _nTankID)
 {
 	CAutoLock __al(m_critsect);
-	m_Shells.push_back(new CShell(_shotid,_nTankID));
-	m_Shells.back()->init(_tank);
+	if(_tank.get_armor()>0 && _tank.get_last_shot_time() >= singleton<CGameConsts>::get().RechargeTime()){
+		m_Shells.push_back(new CShell(_shotid,_nTankID));
+		m_Shells.back()->init(_tank);
+	}
 }
 
 void CGameWorld::free()

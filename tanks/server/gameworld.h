@@ -85,7 +85,7 @@ public:
 		,const CString& _sTankName
 		,const CFlagColor (&_flag)[3]
 		);
-	void add_Shell(const CPhisicsTank& _tank,long _shotid,long _nTankID);
+	void add_Shell(CPhisicsTank& _tank,long _shotid,long _nTankID);
 	void generate_position(CFPoint2D& _pos);
 	void generate_artefacts();
 	void add_exploit(size_t _ticks,const CFPoint3D& _pos,CShell& _shell,long _shellid,double _fly_time,long _nTankID,double _fHit);

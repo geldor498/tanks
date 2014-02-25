@@ -395,6 +395,7 @@ protected:
 	OwnArtefacts m_artefacts;
 	CCriticalSection m_critsect;
 	double m_r_velocity;
+	double m_last_shot_time;
 public:
 	ofstream  m_logger;
 
@@ -415,6 +416,16 @@ public:
 		m_left_track_point.m_ort = m_right_track_point.m_ort = m_ort;	
 
 		m_r_velocity = 0.;
+		m_last_shot_time = singleton<CGameConsts>::get().RechargeTime();
+	}
+
+	//возвращает время с момента последнего выстрела
+	double get_last_shot_time(){
+		return m_last_shot_time;
+	}
+
+	void set_last_shot_time_to_zero(){
+		m_last_shot_time = 0.;
 	}
 
 	//берем артефакт. при подборе артефакта он исключается из массива
@@ -497,7 +508,7 @@ public:
 		//если у танка иссякла броня, то он не может двигается 
 		if(changeInTime == 0. || CPHelper::closeToZero(m_armor.m_count))
 			return;
-		
+		m_last_shot_time +=changeInTime;
 		m_chassis.m_power_left_track_required  = fabs(m_chassis.m_power_left_track_required)<1.?m_chassis.m_power_left_track_required:CPHelper::signum(m_chassis.m_power_left_track_required);
 		m_chassis.m_power_right_track_required = fabs(m_chassis.m_power_right_track_required)<1.?m_chassis.m_power_right_track_required:CPHelper::signum(m_chassis.m_power_right_track_required);
 		double delta_left_track = m_chassis.m_power_left_track_required - m_chassis.m_power_left_track_current;
@@ -764,7 +775,7 @@ public:
 		m_time_passed = 0;
 	};
 
-	void init(const CPhisicsTank& _tank)
+	void init(CPhisicsTank& _tank)
 	{
 		
 		Point3DT<double> ort = _tank.m_ort;
@@ -789,7 +800,7 @@ public:
 		m_ort = ort;
 
 		m_impulse_forces = m_ort * m_impulse_forces_module*singleton<CGameConsts>::get().scale();
-		
+		_tank.set_last_shot_time_to_zero();
 		evaluate_path();
 	};
 
