@@ -572,6 +572,7 @@ void CControl::process_command(const CGetTankInfoCmd& _cmd,CTank& _tank)
 	ti.m_fArmor = _tank.get_armor();
 	ti.m_fFuel = _tank.get_fuel();
 	ti.m_fMass = _tank.get_mass();
+	ti.m_fOrt  = _tank.get_ort();
 	CPhisicsTank::OwnArtefacts artefactsids = _tank.get_artefacts();
 	m_world.get_artefact_info(artefactsids,ti.m_artefacts);
 	_tank.send_tankinfo(ti);
