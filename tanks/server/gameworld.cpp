@@ -5,6 +5,31 @@
 #include "../utility/graphics.h"
 #include "messages.h"
 
+// multi threaded rand
+struct randmt
+{
+protected:
+	unsigned long m_seed;
+	CCriticalSection m_critsect;
+	randmt()
+	{
+		m_seed = (unsigned)time(NULL);
+	}
+
+public:
+	static int next()
+	{
+		static randmt _;
+		CAutoLock __al(_.m_critsect);
+		return(((_.m_seed = _.m_seed * 214013L	+ 2531011L) >> 16) & 0x7fff);
+	}
+
+	static int next(int _val)
+	{
+		return next()%_val;
+	}
+};
+
 inline
 CFPoint3D todraw(const CFPoint3D& _pt)
 {
@@ -607,7 +632,7 @@ void CGameWorld::add_tank(
 			  ,const CFlagColor (&_flag)[3]
 			  )
 {
-	srand((unsigned)time(NULL));
+	//srand((unsigned)time(NULL));
 	CAutoLock __al(m_critsect);
 	m_tanks.push_back(new CTank(_sClientComputerName,_sClientPipeName,_sServerPipeName,_sTeamName,_sTankName,_flag,m_nTankIDLast++,m_hGameFlag));
 	CFPoint2D pos;
@@ -624,8 +649,10 @@ void CGameWorld::generate_position(CFPoint2D& _pos)
 	size_t x = 0,y=0;
 	for(;!avalable;)
 	{
-		x = ::rand(width-7)+3;
-		y = ::rand(height-7)+3;
+		x = randmt::next(width-7)+3;
+		//x = ::rand(width-7)+3;
+		y = randmt::next(height-7)+3;
+		//y = ::rand(height-7)+3;
 		avalable = m_map.available(x,y);
 	}
 	_pos.x = (x-width*0.5)*scale;

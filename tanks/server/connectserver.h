@@ -16,6 +16,7 @@ struct CConnectionServer
 		:CServerPipeCommImpl(g_szTankBattleConnectServer)
 		,m_gameworld(_gameworld)
 		,m_id(0)
+		,m_rand_seed_initialized(false)
 	{
 		start();
 	}
@@ -49,11 +50,19 @@ struct CConnectionServer
 	{
 		CString_ msg = FormatException(_exc);
 	}
+
+	void on_connected()
+	{
+		if(m_rand_seed_initialized) return;
+		srand((unsigned)time(NULL));
+		m_rand_seed_initialized = true;
+	}
 protected:
 	long m_id;
 	CGameWorld& m_gameworld;
+	bool m_rand_seed_initialized;
 };
 
-PIPESERVRERTRAITS(CConnectionServer,ConnectionMessages,false,true);
+PIPESERVRERTRAITS(CConnectionServer,ConnectionMessages,true,true);
 
 
