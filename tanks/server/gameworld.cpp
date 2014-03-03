@@ -536,6 +536,7 @@ void CControl::process_command(const CGetRadarInfoCmd& _cmd,CTank& _tank)
 		for(;tit!=tite;++tit)
 		{
 			const CTank& tank = **tit;
+			if(tank.is_same_team(_tank)) continue;
 			CFPoint2D pos = tank.get_pos();
 			if(rc.inside(pos))
 			{

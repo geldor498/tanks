@@ -196,6 +196,11 @@ public:
 		_ti.m_fArmor = get_armor();
 		_ti.m_fFuel = get_fuel();
 	}
+
+	bool is_same_team(const CTank& _tank) const
+	{
+		return !m_sTeamName.CompareNoCase(_tank.m_sTeamName);
+	}
 };//class CTank
 
 PIPESERVRERTRAITS(CTank,TankServerMessages,false,true);
