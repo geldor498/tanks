@@ -201,6 +201,11 @@ public:
 	{
 		return !m_sTeamName.CompareNoCase(_tank.m_sTeamName);
 	}
+
+	bool is_dead() const 
+	{
+		return CPHelper::closeToZero(m_armor.m_count);
+	}
 };//class CTank
 
 PIPESERVRERTRAITS(CTank,TankServerMessages,false,true);
