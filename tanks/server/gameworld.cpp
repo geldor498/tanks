@@ -649,9 +649,9 @@ void CGameWorld::generate_position(CFPoint2D& _pos)
 	size_t x = 0,y=0;
 	for(;!avalable;)
 	{
-		x = randmt::next(width-7)+3;
+		x = (size_t)randmt::next((int)width-7)+3;
 		//x = ::rand(width-7)+3;
-		y = randmt::next(height-7)+3;
+		y = (size_t)randmt::next((int)height-7)+3;
 		//y = ::rand(height-7)+3;
 		avalable = m_map.available(x,y);
 	}
@@ -662,15 +662,22 @@ void CGameWorld::generate_position(CFPoint2D& _pos)
 void CGameWorld::generate_artefacts()
 {
 	//добавление артефктов
-	long start_id = 1;
-	long art_cnt = 40;
-	for(long i = start_id; i<art_cnt; i++)
+	size_t start_id = 1;
+	size_t art_cnt = singleton<CGameConsts>::get().get_ArtefactsCount();
+	size_t i = 0;
+	for(i = start_id; i<art_cnt; i++)
 	{
-		m_artefacts.insert(std::pair<long, CArtefact*>(i, new CFuelArtefact(i)) );
+		m_artefacts.insert(
+			std::pair<long, CArtefact*>((long)i
+				,(rand(true)?
+					(CArtefact*)new CFuelArtefact((long)i)
+					:(CArtefact*)new CArmorArtefact((long)i))
+				)
+			);
 		CFPoint2D pos;
 		generate_position(pos);
 		Point3DT<double> point(pos.x,pos.y,0);
-		m_artefacts[i]->m_mass_center =  point;
+		m_artefacts[(long)i]->m_mass_center =  point;
 	}
 }
 

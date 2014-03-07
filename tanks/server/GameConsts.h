@@ -61,6 +61,7 @@ public:
 		m_fMapGenWaterCoef = 0.75;
 		m_fMapGenRockCoef = 0.80;
 		m_fRechargeTime = 3.;
+		m_nArtefactsCount = 100;
 
 		//load();
 	}
@@ -110,6 +111,7 @@ public:
 	double get_MapGenTreeCoef() const {return m_fMapGenTreeCoef;}
 	double get_MapGenWaterCoef() const {return m_fMapGenWaterCoef;}
 	double get_MapGenRockCoef() const {return m_fMapGenRockCoef;}
+	size_t get_ArtefactsCount() const {return m_nArtefactsCount;}
 protected:
 	double m_minpassability;
 	unsigned int m_width;
@@ -153,6 +155,7 @@ protected:
 	double m_fMapGenWaterCoef;
 	double m_fMapGenRockCoef;
 	double m_fRechargeTime;
+	size_t m_nArtefactsCount;
 
 public:
 	struct DefaultLayout : public Layout<CGameConsts>
@@ -201,6 +204,7 @@ public:
 			add_simple(_T("MapGenWaterCoef"),&CGameConsts::m_fMapGenWaterCoef);
 			add_simple(_T("MapGenRockCoef"),&CGameConsts::m_fMapGenRockCoef);
 			add_simple(_T("RechargeTime"),&CGameConsts::m_fRechargeTime);			
+			add_simple(_T("ArtefactsCount"),&CGameConsts::m_nArtefactsCount);
 		}
 	};
 
