@@ -34,7 +34,7 @@ struct CGameMap;
 class CPHelper{
 public:
 	static bool closeToZero(double num){
-		return (fabs(num)<1.0e-5)?true: false;
+		return (fabs(num)<1.0e-4)?true: false;
 	}
 	static int signum(double x){
 		return x>=0.?1:-1;
@@ -391,13 +391,13 @@ protected:
 	CMassPoint m_right_track_point;//условная точка соприкосновения правойй гусеницы с землей
 
 	
-
 	OwnArtefacts m_artefacts;
 	CCriticalSection m_critsect;
 	double m_r_velocity;
 	double m_last_shot_time;
 public:
 	ofstream  m_logger;
+	Point3DT<double> m_prev_position;//предыдущая позиция танка. понадобится при обработке столкновений.
 
 	CPhisicsTank()
 	{
@@ -417,6 +417,7 @@ public:
 
 		m_r_velocity = 0.;
 		m_last_shot_time = singleton<CGameConsts>::get().RechargeTime();
+		m_prev_position = m_mass_center;
 	}
 
 	//возвращает время с момента последнего выстрела
@@ -557,7 +558,13 @@ public:
 		//есть все силы - как импульсные, так и векторные. поэтому можно найти результирующую
 		//силу для рассчета линейной динамики. сразу же найдем и линейное ускорение
 		m_acceleration = 1./m_mass *(m_left_track_point.m_const_forces + m_left_track_point.m_impulse_forces + m_right_track_point.m_const_forces + m_right_track_point.m_impulse_forces);
+		if(CPHelper::closeToZero(CPHelper::norm_2d(m_acceleration)))
+			CPHelper::set_to_zero(m_acceleration);
 		m_velocity += m_acceleration * changeInTime;
+		if(CPHelper::closeToZero(CPHelper::norm_2d(m_velocity))){
+			CPHelper::set_to_zero(m_acceleration);
+			CPHelper::set_to_zero(m_velocity);		
+		}
 		m_mass_center += m_velocity * changeInTime;
 
 		//теперь у нас есть почти честно посчитанные модули скоростей
@@ -605,10 +612,10 @@ public:
 			+p1.cross(m_right_track_point.m_impulse_forces + m_right_track_point.m_const_forces);//vect_rt.cross(m_right_track_point.m_impulse_forces + m_right_track_point.m_const_forces);
 		double moment_force = v.z;
 		double moment_inertia = pow(CPHelper::norm_2d(p2),2.)*m_left_track_point.m_mass + pow(CPHelper::norm_2d(p1),2.)*m_right_track_point.m_mass;
-		double r_acceleration = !CPHelper::closeToZero(moment_force)? moment_force/moment_inertia:0.;
+		double r_acceleration = (!CPHelper::closeToZero(moment_force)&& !CPHelper::closeToZero(moment_inertia))? moment_force/moment_inertia:0.;
 
 		m_r_velocity += r_acceleration * changeInTime;
-		double delta_direction = m_r_velocity * changeInTime;
+		double delta_direction = CPHelper::closeToZero(m_r_velocity * changeInTime)?0.:m_r_velocity * changeInTime;
 		m_direction += delta_direction;
 		//и повернуть танк в нужном направлении
 		double c = cos(delta_direction);
@@ -671,6 +678,8 @@ public:
 
 		m_right_track_point.m_velocity = zeroPoint;
 		m_left_track_point.m_velocity = zeroPoint;
+
+		m_r_velocity = 0.;
 	};
 
 
@@ -880,7 +889,7 @@ public:
 class CCollissionFinder{
 	
 public:
-	static void collision(CPhisicsTank& _tank, CShell &_shell){
+	static bool collision(CPhisicsTank& _tank, CShell &_shell){
 		Point3DT<double> tmp = _tank.m_mass_center - _shell.m_mass_center;
 		if(!_shell.m_interaction)
 		{
@@ -891,6 +900,7 @@ public:
 				_tank.modify_armor(-_shell.m_killability+_shell.m_killability2);
 				_shell.m_interaction = true;
 				_shell.m_fHit += _shell.m_killability-_shell.m_killability2;
+				return true;
 			}
 		}
 		else
@@ -899,47 +909,51 @@ public:
 			{
 				_tank.modify_armor(-_shell.m_killability2);
 				_shell.m_fHit += _shell.m_killability2;
+				return true;
 			}
 		}	
+		return false;
 	};
 	
 	//столкновение с ландшафтом.
-	static void collision(CPhisicsTank& _tank, const CGameMap& _map)
+	static bool collision(CPhisicsTank& _tank, const CGameMap& _map)
 	{
-		//скорость танка до столкновения. 
-		Point3DT<double> tmp_velocity = _tank.m_velocity;
-		int sign = CPHelper::signum( _tank.m_ort.x!=0.?tmp_velocity.x/_tank.m_ort.x:tmp_velocity.y/_tank.m_ort.y);
-		
-		//дистанция, которую прошел танк в препятствии. вычисляется приблизительно - 
-		//для простоты считаем, что время движения с указанной скоростью - 0.1 секунды
-		double distance = 0.3 * CPHelper::norm_2d(tmp_velocity);
-		
-		//находим точки, которые будем проверять на столкновение 
-		Point3DT<double> tmp = _tank.m_mass_center;
-		tmp =  _tank.m_mass_center+_tank.m_sphereRadious * _tank.m_ort;
-
-		if( _map.get_height((size_t)CPHelper::tr_x(tmp.x), (size_t)CPHelper::tr_y(tmp.y)) > 0 
-			|| _map.get_passability((size_t)CPHelper::tr_x(tmp.x), (size_t)CPHelper::tr_y(tmp.y)) == 0.){
-			//_tank.m_logger<<"  badabooom!!!!!"<<std::endl;
-			_tank.stop_tank();
-			_tank.retrieve_tank(distance, sign);
+		//создадим хранилище для точек (квадратиков), находящихся япод танком.
+		//затем проверим, нет ли среди них квадратиков гор
+		//таким образом определим столкновение с ландшафтом.
+		std::list<Point2DT<size_t> > cList;
+		Point2DT<size_t> currPoint;
+		int radious = ceil(_tank.m_sphereRadious);
+		for(int  i=-radious; i<=radious; i++){
+			for(int  j=-radious; j<=radious; j++){
+				currPoint.x = (size_t)CPHelper::tr_x(_tank.m_mass_center.x + i);
+				currPoint.y = (size_t)CPHelper::tr_y(_tank.m_mass_center.y + j);
+				cList.push_back(currPoint);
+			}
 		}
-		tmp =  _tank.m_mass_center-_tank.m_sphereRadious * _tank.m_ort;
-
-		if(_map.get_height((size_t)CPHelper::tr_x(tmp.x), (size_t)CPHelper::tr_y(tmp.y)) > 0 
-			|| _map.get_passability((size_t)CPHelper::tr_x(tmp.x), (size_t)CPHelper::tr_y(tmp.y)) == 0.){
-			//_tank.m_logger<<"  badabooom!!!!!"<<std::endl;
-			_tank.stop_tank();
-			_tank.retrieve_tank(distance, sign);
-		}
+		cList.unique();
+		std::list<Point2DT<size_t> >::iterator it = cList.begin();
+		//проверяем столкновения
+		for(;it!=cList.end();++it){
+			if( _map.get_height( it->x, it->y ) > 0 || _map.get_passability(it->x, it->y) == 0.){
+					_tank.stop_tank();
+					_tank.m_mass_center = _tank.m_prev_position;
+					return true;
+			}			
+		}		
+		_tank.m_prev_position = _tank.m_mass_center;
+		return false;
 	};
 
 	// столкновения снаряда с ландшафтом
-	static void collision(CShell& _shell, const CGameMap& _map){
+	static bool collision(CShell& _shell, const CGameMap& _map){
 		double scale = singleton<CGameConsts>::get().scale();
 		if(CPHelper::closeToZero(_shell.m_mass_center.z)
-			|| ( _shell.m_mass_center.z <= scale*_map.get_height((size_t)CPHelper::tr_x(_shell.m_mass_center.x), (size_t)CPHelper::tr_y(_shell.m_mass_center.y))))
+			|| ( _shell.m_mass_center.z <= scale*_map.get_height((size_t)CPHelper::tr_x(_shell.m_mass_center.x), (size_t)CPHelper::tr_y(_shell.m_mass_center.y)))){
 			_shell.m_interaction = true;
+			return true;
+		}
+		return false;
 	};
 };
 
