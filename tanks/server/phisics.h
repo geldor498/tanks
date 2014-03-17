@@ -360,6 +360,9 @@ public:
 	bool m_occupied;//подобран ли артефакт каким-либо танком
 
 	CArtefact(long _ID)
+		:m_type(Artefact_Null)
+		,m_ID(-1)
+		,m_occupied(false)
 	{
 			m_ID = _ID;
 			m_mass_center = Point3DT<double>(0,0,0);
@@ -962,6 +965,7 @@ public:
 	double m_armor_cnt;
 	CArmorArtefact(long _ID):CArtefact(_ID)
 	{
+		m_type = Artefact_Armor;
 		m_armor_cnt = singleton<CGameConsts>::get().get_ArmorArtefactCount();
 		m_mass = singleton<CGameConsts>::get().get_ArmorArtefactMass();
 	}
