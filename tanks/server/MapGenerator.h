@@ -47,6 +47,13 @@ public:
 		return m_data[pos];
 	}
 
+	const _Type& get(long _x,long _y) const 
+	{
+		if(_x<0 || _y<0 || _x>=(long)m_width || _y>=(long)m_height) return Fish<_Type>::get();
+		size_t pos = _y*m_width+_x;
+		return m_data[pos];
+	}
+
 	void set(size_t _x,size_t _y,const _Type& _data)
 	{
 		if(_x>=m_width || _y>=m_height) return;
@@ -531,10 +538,13 @@ public:
 	{
 		return (ObjectEn)m_objects.get(_x,_y);
 	}
+
 	ObjectEn get_object(long _x,long _y) const
 	{
-		return (ObjectEn)m_objects.get(_x,_y);
+		if(_x<0 || _y<0 || _x>=(long)width() || _y>=(long)height()) return Obj_Null;
+		return (ObjectEn)m_objects.get((size_t)_x,(size_t)_y);
 	}
+
 	double get_height(size_t _x,size_t _y) const
 	{
 		return m_heights.get(_x,_y);
