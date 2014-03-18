@@ -728,7 +728,7 @@ public:
 		serv.save(&hw);
 		CHandShack hs;
 		if(!wait_message(hs,true,get_stophandle())) return false;
-		return m_server.open(_sServerCompName,hs.m_sTankPipeID);
+		return m_server.open(_sServerCompName,hs.m_sTankPipeID,GENERIC_WRITE,5000);
 	}
 
 	void shot(IN double _fTurretAngle,IN double _fGunAngle,IN bool _bShot,IN long _nID)
