@@ -52,6 +52,7 @@
 #include <comdef.h>
 
 #define USE_MFC
+#define USE_EXCEPTION_ERRORHANDLING
 
 #include <utils/utils.h>
 #include <utils/typelist.h>
