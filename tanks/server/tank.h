@@ -95,7 +95,7 @@ public:
 
 		start();
 		Sleep(100);
-		m_client.open(_sClientComputerName,_sClientPipeName);
+		m_client.open(_sClientComputerName,_sClientPipeName,GENERIC_WRITE,5000);
 		size_t i=0;
 		for(i=0;i<_countof(m_flag);i++)
 			m_flag[i] = _flag[i];

@@ -714,7 +714,7 @@ public:
 	bool connect(IN const CString& _sServerCompName,IN const CString& _sServerPipeName,IN const CFlagColor (&_flag)[3])
 	{
 		CClientPipeComm serv;
-		if(!serv.open(_sServerCompName,_sServerPipeName)) return false;
+		if(!serv.open(_sServerCompName,_sServerPipeName,GENERIC_WRITE,5000)) return false;
 		CString sThisCompName;
 		GetComputerName(sThisCompName);
 		CHelloWorld hw;
