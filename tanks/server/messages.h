@@ -682,7 +682,7 @@ struct CClientTank
 protected:
 	CSecurityAttributes m_sa;
 public:
-	CClientTank(const CString& _sTeamName,const CString& _sTankName,const CString& _sClientName)
+	CClientTank(IN const CString& _sTeamName,IN const CString& _sTankName,IN const CString& _sClientName)
 		:CServerPipeCommImpl(_sClientName)
 		,m_sTeamName(_sTeamName)
 		,m_sClientPipeName(_sClientName)
@@ -711,7 +711,7 @@ public:
 		predestruct();
 	}
 
-	bool connect(const CString& _sServerCompName,const CString& _sServerPipeName,const CFlagColor (&_flag)[3])
+	bool connect(IN const CString& _sServerCompName,IN const CString& _sServerPipeName,IN const CFlagColor (&_flag)[3])
 	{
 		CClientPipeComm serv;
 		if(!serv.open(_sServerCompName,_sServerPipeName)) return false;
@@ -731,7 +731,7 @@ public:
 		return m_server.open(_sServerCompName,hs.m_sTankPipeID);
 	}
 
-	void shot(double _fTurretAngle,double _fGunAngle, bool _bShot,long _nID)
+	void shot(IN double _fTurretAngle,IN double _fGunAngle,IN bool _bShot,IN long _nID)
 	{
 		CShotCmd shot;
 		shot.m_fTurretAngle = _fTurretAngle;
@@ -741,7 +741,7 @@ public:
 		m_server.save(&shot);
 	}
 
-	void move(double _fLeftTrackSpeed,double _fRightTrackSpeed)
+	void move(IN double _fLeftTrackSpeed,IN double _fRightTrackSpeed)
 	{
 		CMoveCmd move;
 		move.m_fVLeftTrack = _fLeftTrackSpeed;
@@ -749,42 +749,42 @@ public:
 		m_server.save(&move);
 	}
 
-	void take_artefact(CArtefactInfo& _artefact)
+	void take_artefact(OUT CArtefactInfo& _artefact)
 	{
 		CTakeArtefactCmd cmd;
 		m_server.save(&cmd);
 		wait_message(_artefact,true,get_stophandle());
 	}
 
-	void use_artefact(long _nArtefactID)
+	void use_artefact(IN long _nArtefactID)
 	{
 		CUseArtefactCmd cmd;
 		cmd.m_ArtefactID = _nArtefactID;
 		m_server.save(&cmd);
 	}
 
-	void put_artefact(long _nArtefactID)
+	void put_artefact(IN long _nArtefactID)
 	{
 		CPutArtefactCmd cmd;
 		cmd.m_ArtefactID = _nArtefactID;
 		m_server.save(&cmd);
 	}
 
-	void get_radarinfo(CRadarInfo& _info)
+	void get_radarinfo(OUT CRadarInfo& _info)
 	{
 		CGetRadarInfoCmd cmd;
 		m_server.save(&cmd);
 		wait_message(_info,true,get_stophandle());
 	}
 
-	void get_tankinfo(CTankInfo& _tankinfo)
+	void get_tankinfo(OUT CTankInfo& _tankinfo)
 	{
 		CGetTankInfoCmd cmd;
 		m_server.save(&cmd);
 		wait_message(_tankinfo,true,get_stophandle());
 	}
 
-	void get_exploitsinfo(CExploitsInfo& _exploitsinfo)
+	void get_exploitsinfo(OUT CExploitsInfo& _exploitsinfo)
 	{
 		CGetExploitsInfoCmd cmd;
 		m_server.save(&cmd);
