@@ -2,6 +2,7 @@
 
 #include <utils/serialize.h>
 #include <utils/synchronize.h>
+#include <utils/security.h>
 #include "../utility/graphics.h"
 #include "GameConsts.h"
 
@@ -678,12 +679,29 @@ struct CClientTank
 	:public CServerPipeCommImpl<CClientTank,TankClientMessages>
 	,public CMessagesQueue
 {
+protected:
+	CSecurityAttributes m_sa;
+public:
 	CClientTank(const CString& _sTeamName,const CString& _sTankName,const CString& _sClientName)
 		:CServerPipeCommImpl(_sClientName)
 		,m_sTeamName(_sTeamName)
 		,m_sClientPipeName(_sClientName)
 		,m_sTankName(_sTankName)
 	{
+		CSid everyone = security::Sids::World();
+		CSid owner = security::Sids::Self();
+
+		CDacl dacl;
+		dacl.AddDeniedAce(everyone,security::AccessRights_WriteDac);
+		dacl.AddAllowedAce(everyone,security::AccessRights_GenericWrite|security::AccessRights_GenericRead);
+		dacl.AddAllowedAce(owner,security::AccessRights_GenericAll);
+
+		CSecurityDesc secrdesc;
+		secrdesc.SetDacl(dacl);
+
+		m_sa.Set(secrdesc);
+		m_psa = &m_sa;
+
 		start();
 		Sleep(20);
 	}

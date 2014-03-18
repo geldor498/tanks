@@ -6,18 +6,36 @@
 #include <pipe/server.h>
 #include <pipe/client.h>
 #include <utils/typelist.h>
+#include <utils/security.h>
 
 typedef TYPELIST_1(CHelloWorld) ConnectionMessages;
 
 struct CConnectionServer 
 	:public CServerPipeCommImpl<CConnectionServer,ConnectionMessages>
 {
+protected:
+	CSecurityAttributes m_sa;
+public:
+
 	CConnectionServer(CGameWorld& _gameworld)
 		:CServerPipeCommImpl(g_szTankBattleConnectServer)
 		,m_gameworld(_gameworld)
 		,m_id(0)
 		,m_rand_seed_initialized(false)
 	{
+		CSid everyone = security::Sids::World();
+		CSid owner = security::Sids::Self();
+
+		CDacl dacl;
+		dacl.AddDeniedAce(everyone,security::AccessRights_WriteDac);
+		dacl.AddAllowedAce(everyone,security::AccessRights_GenericWrite|security::AccessRights_GenericRead);
+		dacl.AddAllowedAce(owner,security::AccessRights_GenericAll);
+
+		CSecurityDesc secrdesc;
+		secrdesc.SetDacl(dacl);
+
+		m_sa.Set(secrdesc);
+		m_psa = &m_sa;
 		start();
 	}
 

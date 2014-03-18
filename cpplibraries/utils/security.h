@@ -8,9 +8,9 @@
 #include "config.h"
 #include "atlmfc.h"
 
-#if _MSC_VER > 1100 
-#error Don`t use this header not for MSVC 5.0
-#endif
+//#if _MSC_VER < 1100 
+//#error Don`t use this header not for MSVC 5.0
+//#endif
 
 #include <new.h>
 #include <LMCONS.H>
@@ -24,9 +24,11 @@
 //#include <sddl.h>
 #include <algorithm>
 #include <map>
+#include <Sddl.h>
 
 #include "errors.h"
 
+#pragma comment(lib,"Advapi32.lib")
 //#pragma warning(push)
 
 #pragma warning(disable:4786)
@@ -41,7 +43,7 @@ only it own errors :) (but not mine too :-) ).
 
 //@{
 //#undef bool
-#include <stl/bool.h>
+//#include <stl/bool.h>
 
 #if !defined(sizea)
 #define sizea(arg) sizeof(arg)/sizeof(arg[0])

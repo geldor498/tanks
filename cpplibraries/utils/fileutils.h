@@ -753,7 +753,6 @@ namespace FileUtils
 	inline
 	bool load_file(const CString_& _sFileName,CString_& _text)
 	{
-		CString_ str;
 		HANDLE hfile = ::CreateFile(
 			_sFileName
 			,GENERIC_READ
@@ -772,15 +771,17 @@ namespace FileUtils
 			return false;
 		}
 		DWORD dwReaded = 0;
-		if(!ReadFile(hfile,str.GetBuffer(dwSize),dwSize,&dwReaded,NULL)
+		std::vector<BYTE> buf;
+		buf.resize(dwSize);
+		if(!ReadFile(hfile,&buf[0],dwSize,&dwReaded,NULL)
 			|| dwReaded!=dwSize)
 		{
 			CloseHandle(hfile);
 			return false;
 		}
 		CloseHandle(hfile);
-		str.ReleaseBuffer(dwSize);
-		_text = str;
+		string_converter<char,TCHAR> strT((char*)&buf[0],dwSize);
+		_text = (LPCTSTR)strT;
 		return true;
 	}
 

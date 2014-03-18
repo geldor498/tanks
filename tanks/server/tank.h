@@ -5,6 +5,7 @@
 #include "phisics.h"
 #include <fstream>
 #include <math.h>
+#include <utils/security.h>
 using std::ofstream;
 
 #define M_PI       3.14159265358979323846
@@ -56,6 +57,8 @@ protected:
 
 protected:
 	CCriticalSection m_critsect;
+protected:
+	CSecurityAttributes m_sa;
 public:
 	CTank(
 		const CString& _sClientComputerName
@@ -75,6 +78,21 @@ public:
 		,m_hGameFlag(_hGameFlag)
 	{
 		m_nTankID = _nTankID;
+
+		CSid everyone = security::Sids::World();
+		CSid owner = security::Sids::Self();
+
+		CDacl dacl;
+		dacl.AddDeniedAce(everyone,security::AccessRights_WriteDac);
+		dacl.AddAllowedAce(everyone,security::AccessRights_GenericWrite|security::AccessRights_GenericRead);
+		dacl.AddAllowedAce(owner,security::AccessRights_GenericAll);
+
+		CSecurityDesc secrdesc;
+		secrdesc.SetDacl(dacl);
+
+		m_sa.Set(secrdesc);
+		m_psa = &m_sa;
+
 		start();
 		Sleep(100);
 		m_client.open(_sClientComputerName,_sClientPipeName);

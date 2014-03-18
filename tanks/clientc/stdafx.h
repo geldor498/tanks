@@ -57,5 +57,6 @@
 #include <utils/typelist.h>
 #include <utils/serialize.h>
 #include <utils/synchronize.h>
+#include <utils/security.h>
 #include <pipe/client.h>
 #include <pipe/server.h>

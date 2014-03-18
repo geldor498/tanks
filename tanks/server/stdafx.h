@@ -83,6 +83,7 @@
 #define USE_MFC
 #include <utils/utils.h>
 #include <utils/typelist.h>
+#include <utils/security.h>
 #include <pipe/server.h>
 #include <pipe/client.h>
 #include <pipe/databases.h>
