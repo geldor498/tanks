@@ -157,7 +157,7 @@ void string_converter_helper<WCHAR,WCHAR>::convert(const WCHAR* _src,int _srclen
 		);
 	long srclen = _srclen>=0?_srclen: lstrlenW(_src);
 	//_destlen = srclen;
-	if(_src[srclen]!=0) 
+	if(_srclen==0 && _src[srclen]!=0)
 	{
 		_dest = srclen+1>_defbufsize?trace_alloc(new WCHAR[srclen+1]):(WCHAR*)_defbuf;
 		lstrcpynW(_dest,_src,srclen+1);
@@ -204,7 +204,7 @@ void string_converter_helper<CHAR,CHAR>::convert(const CHAR* _src,int _srclen
 
 	long srclen = _srclen>=0?_srclen: lstrlenA(_src);
 	//_destlen = srclen;
-	if(_src[srclen]!=0) 
+	if(_srclen==0 && _src[srclen]!=0) 
 	{
 		_dest = srclen+1>_defbufsize?trace_alloc(new CHAR[srclen+1]):(CHAR*)_defbuf;
 		lstrcpynA(_dest,_src,srclen+1);
